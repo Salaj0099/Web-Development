@@ -19,7 +19,7 @@ function Home() {
           <a href="#how">How it works</a>
           <a href="#features">Features</a>
           <a href="#why">Why OilDesk</a>
-          <a href="#faq">FAQs</a>
+          <a href="FAQs">FAQs</a>
         </div>
         <div className="nav-end">
           <button className="btn-signin" onClick={() => navigate("/signin")}>Sign In</button>
