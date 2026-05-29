@@ -1,0 +1,231 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; }
+
+.auth-page {
+  min-height: 100vh;
+  background: #0b1a2e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-card {
+  display: flex;
+  width: 720px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+/* Form Side */
+.auth-form {
+  background: #fff;
+  padding: 44px 40px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 28px;
+  cursor: pointer;
+}
+
+.auth-logo b { color: #c85a00; }
+
+.auth-logo-icon {
+  width: 30px;
+  height: 30px;
+  background: #c85a00;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-form h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0b1a2e;
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+}
+
+.auth-form p {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 24px;
+}
+
+.auth-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.field { margin-bottom: 14px; }
+
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 5px;
+}
+
+.field input {
+  width: 100%;
+  background: #f8f9fa;
+  border: 1.5px solid #e8ecf0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #1a1a1a;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.field input:focus { border-color: #c85a00; }
+.field input::placeholder { color: #bbb; }
+
+.auth-forgot {
+  text-align: right;
+  font-size: 12px;
+  font-weight: 600;
+  color: #c85a00;
+  cursor: pointer;
+  margin-bottom: 16px;
+  margin-top: -6px;
+}
+
+.auth-btn {
+  width: 100%;
+  background: #c85a00;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.15s;
+  margin-bottom: 16px;
+}
+
+.auth-btn:hover { background: #a84800; }
+.auth-btn:disabled { background: #ddd; cursor: not-allowed; color: #999; }
+
+.auth-switch {
+  text-align: center;
+  font-size: 13px;
+  color: #888;
+}
+
+.auth-switch span {
+  color: #c85a00;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Panel Side */
+.auth-panel {
+  background: #0b1a2e;
+  padding: 44px 32px;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.panel-icon {
+  width: 56px;
+  height: 56px;
+  background: #c85a00;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.auth-panel h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+
+.auth-panel p {
+  font-size: 13px;
+  color: #8da3b8;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.panel-divider {
+  width: 40px;
+  height: 2px;
+  background: #c85a00;
+  margin-bottom: 20px;
+  border-radius: 2px;
+}
+
+.panel-points {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.panel-point {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #8da3b8;
+}
+
+.pp-dot {
+  width: 6px;
+  height: 6px;
+  background: #c85a00;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.panel-btn {
+  width: 100%;
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 8px;
+  padding: 11px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.15s;
+}
+
+.panel-btn:hover { border-color: #c85a00; color: #f0874a; }
