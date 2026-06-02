@@ -5,113 +5,164 @@ import "./Auth.css"
 
 function SignUp() {
   const navigate = useNavigate()
-  const [form, setForm] = useState({ name: "", email: "", password: "" })
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" })
+  const [showPw, setShowPw] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [agreed, setAgreed] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async () => {
-    if (!form.name || !form.email || !form.password) {
-      setError("All fields are required")
-      return
-    }
-    if (form.password.length < 6) {
-      setError("Password must be at least 6 characters")
-      return
-    }
+    if (!form.name || !form.email || !form.password || !form.confirm) { setError("All fields are required"); return }
+    if (form.password.length < 6) { setError("Password must be at least 6 characters"); return }
+    if (form.password !== form.confirm) { setError("Passwords do not match"); return }
+    if (!agreed) { setError("Please agree to the Terms and Conditions"); return }
     try {
       setLoading(true)
-      const res = await signUp(form)
-      if (res.data.message === "Registered successfully") {
+      const res = await signUp({ name: form.name, email: form.email, password: form.password })
+      if (res.data.message === "Created successfully") {
         navigate("/signin")
       } else {
         setError(res.data.message)
       }
     } catch (e) {
-      setError("Something went wrong")
+      setError("Something went wrong. Please try again.")
     } finally {
       setLoading(false)
     }
   }
 
+  const EyeIcon = ({ show }) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      {show
+        ? <><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></>
+        : <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>
+      }
+    </svg>
+  )
+
   return (
     <div className="auth-page">
-      <div className="auth-card">
+      <div className="auth-card" style={{ minHeight: "620px" }}>
 
-        {/* Panel Side */}
-        <div className="auth-panel">
-          <div className="panel-icon">
-            <svg viewBox="0 0 24 24" fill="white" width="32" height="32">
-              <path d="M12 3C12 3 6 10 6 15C6 18.3 8.7 21 12 21C15.3 21 18 18.3 18 15C18 10 12 3 12 3Z"/>
-            </svg>
+        {/* LEFT PANEL */}
+        <div className="auth-left">
+          <div className="left-brand">
+            <div className="left-logo" onClick={() => navigate("/")}>
+              <div className="left-logo-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 3C12 3 6 10 6 15C6 18.3 8.7 21 12 21C15.3 21 18 18.3 18 15C18 10 12 3 12 3Z"/></svg>
+              </div>
+              <span className="left-logo-text">Oil<span>Desk</span></span>
+            </div>
+            <div className="left-tagline">Set up in minutes.<br />Bill from day one.</div>
+            <p className="left-sub">Create your store account, add your products, and issue your first VAT invoice right away.</p>
           </div>
-          <h3>Welcome Back!</h3>
-          <p>Already have an account? Sign in to continue managing your oil store.</p>
-          <div className="panel-divider"></div>
-          <div className="panel-points">
-            <div className="panel-point"><span className="pp-dot"></span>Nepal VAT compliant</div>
-            <div className="panel-point"><span className="pp-dot"></span>Stock tracking & alerts</div>
-            <div className="panel-point"><span className="pp-dot"></span>PDF invoices</div>
-            <div className="panel-point"><span className="pp-dot"></span>Daily sales reports</div>
+          <div className="left-stats">
+            <div className="left-stat">
+              <div className="stat-icon">✓</div>
+              <div><div className="stat-label">No credit card needed</div><div className="stat-val">Free trial</div></div>
+            </div>
+            <div className="left-stat">
+              <div className="stat-icon">🇳🇵</div>
+              <div><div className="stat-label">Built for Nepal</div><div className="stat-val">IRD VAT compliant</div></div>
+            </div>
+            <div className="left-stat">
+              <div className="stat-icon">⚡</div>
+              <div><div className="stat-label">Ready to use</div><div className="stat-val">Under 2 minutes setup</div></div>
+            </div>
           </div>
-          <button className="panel-btn" onClick={() => navigate("/signin")}>
-            Sign In
-          </button>
+          <div className="left-footer">© 2026 OilDesk Nepal</div>
         </div>
 
-        {/* Form Side */}
-        <div className="auth-form">
-          <div className="auth-logo" onClick={() => navigate("/")}>
-            <div className="auth-logo-icon">
-              <svg viewBox="0 0 24 24" fill="white" width="18" height="18">
-                <path d="M12 3C12 3 6 10 6 15C6 18.3 8.7 21 12 21C15.3 21 18 18.3 18 15C18 10 12 3 12 3Z"/>
-              </svg>
+        {/* RIGHT PANEL */}
+        <div className="auth-right">
+          <div className="auth-right-logo" onClick={() => navigate("/")}>
+            <div className="auth-right-logo-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 3C12 3 6 10 6 15C6 18.3 8.7 21 12 21C15.3 21 18 18.3 18 15C18 10 12 3 12 3Z"/></svg>
             </div>
-            <span>Oil<b>Desk</b></span>
+            <div className="auth-right-logo-name">Oil<span>Desk</span></div>
+            <div className="auth-right-logo-tag">Nepal Oil Store Management</div>
           </div>
 
-          <h2>Create Account</h2>
-          <p>Set up your oil store in minutes.</p>
+          <div className="auth-right-divider"></div>
 
-          {error && <div className="auth-error">{error}</div>}
+          <div className="auth-form-title">Register</div>
+          <div className="auth-form-sub">Create your store account.</div>
 
-          <div className="field">
-            <label>Full Name</label>
-            <input
-              type="text"
-              placeholder="Ram Bahadur"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
+          <div className="auth-form">
+            {error && <div className="auth-error">{error}</div>}
+
+            <div className="form-row">
+              <div className="field">
+                <label>Full Name</label>
+                <input
+                  type="text"
+                  placeholder="Enter full name"
+                  value={form.name}
+                  onChange={e => setForm({ ...form, name: e.target.value })}
+                />
+              </div>
+              <div className="field">
+                <label>Email ID</label>
+                <input
+                  type="email"
+                  placeholder="Enter valid email ID"
+                  value={form.email}
+                  onChange={e => setForm({ ...form, email: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="field">
+                <label>Password</label>
+                <div className="field-pw">
+                  <input
+                    type={showPw ? "text" : "password"}
+                    placeholder="Enter password"
+                    value={form.password}
+                    onChange={e => setForm({ ...form, password: e.target.value })}
+                  />
+                  <button className="pw-eye" type="button" onClick={() => setShowPw(!showPw)}>
+                    <EyeIcon show={showPw} />
+                  </button>
+                </div>
+              </div>
+              <div className="field">
+                <label>Confirm Password</label>
+                <div className="field-pw">
+                  <input
+                    type={showConfirm ? "text" : "password"}
+                    placeholder="Enter confirm password"
+                    value={form.confirm}
+                    onChange={e => setForm({ ...form, confirm: e.target.value })}
+                  />
+                  <button className="pw-eye" type="button" onClick={() => setShowConfirm(!showConfirm)}>
+                    <EyeIcon show={showConfirm} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <label className="remember" style={{ marginTop: "4px" }}>
+              <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} />
+              I have read and agreed with the{" "}
+              <span style={{ color: "#c85a00", fontWeight: 600, cursor: "pointer" }}>Terms and Conditions</span>
+            </label>
+
+            <button className="auth-btn" onClick={handleSubmit} disabled={loading}>
+              {loading ? "Creating account..." : "Register"}
+            </button>
+
+            <div className="auth-switch">
+              Already a User? <span onClick={() => navigate("/signin")}>Login</span>
+            </div>
           </div>
 
-          <div className="field">
-            <label>Email</label>
-            <input
-              type="email"
-              placeholder="admin@example.com"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-            />
+          <div className="auth-support">
+            <div className="support-dot"></div>
+            Email us: <a href="mailto:support@oildesk.app">support@oildesk.app</a>
           </div>
-
-          <div className="field">
-            <label>Password</label>
-            <input
-              type="password"
-              placeholder="Min. 6 characters"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
-          </div>
-
-          <button className="auth-btn" onClick={handleSubmit} disabled={loading}>
-            {loading ? "Creating account..." : "Create Account →"}
-          </button>
-
-          <p className="auth-switch">
-            Already have an account?{" "}
-            <span onClick={() => navigate("/signin")}>Sign In</span>
-          </p>
         </div>
 
       </div>

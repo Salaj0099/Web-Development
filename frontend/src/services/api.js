@@ -2,6 +2,19 @@ import axios from "axios";
 
 const API = axios.create({ baseURL: "/api" });
 
+API.interceptors.request.use((config) => {
+  const stored = localStorage.getItem("user");
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed.token) {
+        config.headers.Authorization = `Bearer ${parsed.token}`;
+      }
+    } catch (_) {}
+  }
+  return config;
+});
+
 // Customers
 export const createCustomer = (data) => API.post("/customer/create", data);
 export const getAllCustomers = () => API.get("/customer/all");
@@ -24,3 +37,5 @@ export const getBillStats = () => API.get("/bill/stats");
 // Auth
 export const signUp = (data) => API.post("/user/register", data);
 export const signIn = (data) => API.post("/user/login", data);
+export const forgotPassword = (data) => API.post("/user/forgot-password", data);
+export const resetPassword = (data) => API.post("/user/reset-password", data);
