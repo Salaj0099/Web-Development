@@ -1,8 +1,11 @@
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import "./Home.css"
 
 function Home() {
   const navigate = useNavigate()
+  const [showHiw, setShowHiw] = useState(false)
+  const [showWhy, setShowWhy] = useState(false)
 
   return (
     <div>
@@ -16,10 +19,10 @@ function Home() {
           <div className="logo-text">Oil<span>Desk</span>.app</div>
         </div>
         <div className="nav-links">
-          <a href="#how">How it works</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); setShowHiw(true) }}>How it works</a>
           <a href="#features">Features</a>
-          <a href="#why">Why OilDesk</a>
-          <a href="FAQs">FAQs</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); setShowWhy(true) }}>Why OilDesk</a>
+          <a href="/faqs">FAQs</a>
         </div>
         <div className="nav-end">
           <button className="btn-signin" onClick={() => navigate("/signin")}>Sign In</button>
@@ -35,7 +38,7 @@ function Home() {
           <p className="hero-sub">OilDesk handles your VAT billing, stock tracking, daily sales, and customer records. The 13% VAT calculates itself. Bills print as PDFs. Everything is in one place.</p>
           <div className="hero-btns">
             <button className="hbtn-p" onClick={() => navigate("/signup")}>Get started free</button>
-            <button className="hbtn-s" onClick={() => document.getElementById("how").scrollIntoView({ behavior: "smooth" })}>See how it works</button>
+            <button className="hbtn-s" onClick={() => setShowHiw(true)}>See how it works</button>
           </div>
           <div className="hero-trust">
             <div className="trust-item"><div className="trust-dot"></div>13% VAT auto-calculated</div>
@@ -55,7 +58,6 @@ function Home() {
               <div className="hc-stat"><div className="hc-stat-val">12</div><div className="hc-stat-label">Bills Today</div></div>
               <div className="hc-stat"><div className="hc-stat-val">Rs 5.2K</div><div className="hc-stat-label">VAT Collected</div></div>
             </div>
-
             <div className="tank-wrap">
               <div className="tank-row"><span>Petrol — Tank 01</span><span style={{ color: "#22c55e" }}>82%</span></div>
               <div className="tank-bar"><div className="tb-fill tb-green" style={{ width: "82%" }}></div></div>
@@ -69,9 +71,7 @@ function Home() {
               <div className="tank-row"><span>Kerosene — Tank 03</span><span style={{ color: "#f59e0b" }}>54%</span></div>
               <div className="tank-bar"><div className="tb-fill" style={{ width: "54%", background: "#f59e0b" }}></div></div>
             </div>
-
             <div className="hc-divider" style={{ marginTop: "12px" }}></div>
-
             <div style={{ background: "#f8f9fa", borderRadius: "8px", overflow: "hidden" }}>
               <div style={{ background: "#0b1a2e", padding: "6px 10px", fontSize: "10px", fontWeight: "700", color: "#fff", letterSpacing: "1px", textTransform: "uppercase", textAlign: "center" }}>Commodities</div>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -256,8 +256,142 @@ function Home() {
         </div>
       </div>
 
+      {/* ── HOW IT WORKS MODAL ── */}
+      {showHiw && (
+        <div style={styles.overlay} onClick={() => setShowHiw(false)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <button style={styles.close} onClick={() => setShowHiw(false)}>×</button>
+            <div style={styles.title}>How it works</div>
+            <div style={styles.sub}>Everything you need to run your oil store.</div>
+
+            {[
+              { icon: "🧾", name: "VAT Billing", desc: "Prints a proper receipt every sale. 13% VAT comes out of the price — not added on after. Customer gets a copy, you keep one." },
+              { icon: "📦", name: "Stock Tracking", desc: "Sell a drum, the count drops. Receive a delivery, it goes back up. Check what's left from your phone without counting anything." },
+              { icon: "📊", name: "Sales Reports", desc: "Yesterday's sales, this week's revenue, your top product — one screen. Filter by date, print the month-end summary." },
+              { icon: "👤", name: "Customer Credit", desc: "Some customers pay later. Log the amount, see the balance, know what's outstanding before the next delivery arrives." },
+              { icon: "🚚", name: "Supplier Purchases", desc: "Every delivery goes in with the date, quantity, and price. Stock goes up automatically. When something doesn't add up, you have something to check." },
+              { icon: "⚡", name: "Quick Setup", desc: "Add your store, set up your products, start recording sales. Most shops are live within a couple of hours." },
+            ].map((f, i) => (
+              <div key={i} style={styles.row}>
+                <div style={styles.icon}>{f.icon}</div>
+                <div>
+                  <div style={styles.fname}>{f.name}</div>
+                  <div style={styles.fdesc}>{f.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── WHY THIS EXISTS MODAL ── */}
+      {showWhy && (
+        <div style={styles.overlay} onClick={() => setShowWhy(false)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <button style={styles.close} onClick={() => setShowWhy(false)}>×</button>
+            <div style={styles.title}>Why this exists</div>
+            <div style={styles.sub}>Built because the register system was broken.</div>
+            <p style={styles.para}>Walk into any oil store in Nepal and you'll find the same thing — a thick register behind the counter. One for sales. One for stock. One for customer credit. Sometimes just one book for everything, with columns that run out of space by mid-month.</p>
+            <p style={styles.para}>It works, until it doesn't. A page gets torn. Numbers don't match. A customer disputes a balance you can't prove. Month end arrives and someone has to sit down and add up every single sale by hand just to figure out the VAT.</p>
+            <p style={styles.para}>Nobody built anything for this. The accounting software was made for big businesses. The billing apps didn't understand Nepal's VAT rules. Everything assumed you had an accountant, a computer, and time to figure it out.</p>
+            <p style={styles.para}>So we built OilDesk. Something small enough for a shop counter, specific enough for how oil stores actually work, and simple enough that you don't need any training to use it.</p>
+            <p style={{ ...styles.para, fontWeight: "600", color: "#111", marginBottom: 0 }}>If you've ever missed a closing because you were still balancing the register — this is for you.</p>
+          </div>
+        </div>
+      )}
+
     </div>
   )
+}
+
+const styles = {
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,0.45)",
+    zIndex: 1000,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "24px",
+  },
+  modal: {
+    background: "#fff",
+    borderRadius: "16px",
+    width: "100%",
+    maxWidth: "600px",
+    maxHeight: "85vh",
+    overflowY: "auto",
+    padding: "28px 28px 24px",
+    position: "relative",
+    boxShadow: "0 24px 64px rgba(0,0,0,0.2)",
+    fontFamily: "-apple-system, 'Inter', sans-serif",
+  },
+  close: {
+    position: "absolute",
+    top: "14px",
+    right: "14px",
+    width: "26px",
+    height: "26px",
+    borderRadius: "50%",
+    background: "#f0f0f0",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "15px",
+    color: "#666",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    lineHeight: 1,
+  },
+  title: {
+    fontSize: "20px",
+    fontWeight: "700",
+    color: "#111",
+    marginBottom: "5px",
+    letterSpacing: "-0.02em",
+    paddingRight: "28px",
+  },
+  sub: {
+    fontSize: "12px",
+    color: "#999",
+    marginBottom: "20px",
+  },
+  row: {
+    display: "flex",
+    gap: "13px",
+    alignItems: "flex-start",
+    padding: "12px 0",
+    borderBottom: "1px solid #f2f2f2",
+  },
+  icon: {
+    width: "28px",
+    height: "28px",
+    borderRadius: "6px",
+    background: "#f5f5f5",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    fontSize: "14px",
+  },
+  fname: {
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#111",
+    marginBottom: "3px",
+  },
+  fdesc: {
+    fontSize: "12px",
+    color: "#888",
+    lineHeight: "1.55",
+  },
+  para: {
+    fontSize: "13px",
+    color: "#444",
+    lineHeight: "1.65",
+    marginBottom: "14px",
+  },
 }
 
 export default Home

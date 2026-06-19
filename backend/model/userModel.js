@@ -1,24 +1,27 @@
 const pool = require("../database/db");
 
+// Columns safe to return to the client (never expose password / reset token)
+const PUBLIC_FIELDS = "id, name, email, created_at";
+
 const createUser = async (name, email, password) => {
   const result = await pool.query(
-    "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *",
+    `INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING ${PUBLIC_FIELDS}`,
     [name, email, password]
   );
   return result.rows[0];
 };
 
+// Returns the full row (including password) — for internal auth checks only.
 const existingUser = async (email) => {
-  const result = await pool.query(
-    "SELECT * FROM users WHERE email = $1",
-    [email]
-  );
+  const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+    email,
+  ]);
   return result.rows[0];
 };
 
 const saveResetToken = async (email, token, expiry) => {
   const result = await pool.query(
-    "UPDATE users SET reset_token = $1, reset_token_expiry = $2 WHERE email = $3 RETURNING *",
+    `UPDATE users SET reset_token = $1, reset_token_expiry = $2 WHERE email = $3 RETURNING ${PUBLIC_FIELDS}`,
     [token, expiry, email]
   );
   return result.rows[0];
@@ -34,7 +37,7 @@ const getUserByResetToken = async (token) => {
 
 const updatePassword = async (id, password) => {
   const result = await pool.query(
-    "UPDATE users SET password = $1, reset_token = NULL, reset_token_expiry = NULL WHERE id = $2 RETURNING *",
+    `UPDATE users SET password = $1, reset_token = NULL, reset_token_expiry = NULL WHERE id = $2 RETURNING ${PUBLIC_FIELDS}`,
     [password, id]
   );
   return result.rows[0];
