@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import "./Home.css"
+import heroImg from "../assets/hero.png"
 
 function Home() {
   const navigate = useNavigate()
@@ -30,21 +31,11 @@ function Home() {
         </div>
       </nav>
 
-      {/* HERO */}
-      <section className="hero">
-        <div>
-          <div className="hero-tag">⛽ For Nepal Petroleum Retailers</div>
-          <h1>Oil store management,<br /><em>done properly.</em></h1>
-          <p className="hero-sub">OilDesk handles your VAT billing, stock tracking, daily sales, and customer records. The 13% VAT calculates itself. Bills print as PDFs. Everything is in one place.</p>
-          <div className="hero-btns">
-            <button className="hbtn-p" onClick={() => navigate("/signup")}>Get started free</button>
-            <button className="hbtn-s" onClick={() => setShowHiw(true)}>See how it works</button>
-          </div>
-          <div className="hero-trust">
-            <div className="trust-item"><div className="trust-dot"></div>13% VAT auto-calculated</div>
-            <div className="trust-item"><div className="trust-dot"></div>Print bills as PDF</div>
-            <div className="trust-item"><div className="trust-dot"></div>Stock alerts</div>
-          </div>
+      {/* HERO — ABOUT OILDESK */}
+      <section className="about-od about-od-hero">
+        <div className="about-od-left">
+          <h1 className="about-od-h">About <em>OilDesk</em></h1>
+          <p className="about-od-p">OilDesk is a billing and store management app built specifically for oil stores in Nepal. No register, no manual calculation — just your phone or computer behind the counter. You can use it to record sales, print VAT receipts, track stock, log supplier deliveries, and manage customer credit. Everything that currently lives in a handwritten book, in one place. Works on both web and mobile.</p>
         </div>
 
         <div className="hero-card">
@@ -53,22 +44,17 @@ function Home() {
             <span className="hc-live"><span className="hc-live-dot"></span>Live</span>
           </div>
           <div className="hc-body">
-            <div className="hc-stats">
-              <div className="hc-stat"><div className="hc-stat-val">Rs 42K</div><div className="hc-stat-label">Today Sales</div></div>
-              <div className="hc-stat"><div className="hc-stat-val">12</div><div className="hc-stat-label">Bills Today</div></div>
-              <div className="hc-stat"><div className="hc-stat-val">Rs 5.2K</div><div className="hc-stat-label">VAT Collected</div></div>
-            </div>
             <div className="tank-wrap">
-              <div className="tank-row"><span>Petrol — Tank 01</span><span style={{ color: "#22c55e" }}>82%</span></div>
+              <div className="tank-row"><span>Tank 01 — Petrol</span><span style={{ color: "#22c55e" }}>82%</span></div>
               <div className="tank-bar"><div className="tb-fill tb-green" style={{ width: "82%" }}></div></div>
             </div>
             <div className="tank-wrap">
-              <div className="tank-row"><span>Diesel — Tank 02</span><span style={{ color: "#ef4444" }}>18%</span></div>
+              <div className="tank-row"><span>Tank 02 — Diesel</span><span style={{ color: "#ef4444" }}>18%</span></div>
               <div className="tank-bar"><div className="tb-fill tb-red" style={{ width: "18%" }}></div></div>
               <div className="low-alert">Low Stock — Reorder Required</div>
             </div>
             <div className="tank-wrap">
-              <div className="tank-row"><span>Kerosene — Tank 03</span><span style={{ color: "#f59e0b" }}>54%</span></div>
+              <div className="tank-row"><span>Tank 03 — Kerosene</span><span style={{ color: "#f59e0b" }}>54%</span></div>
               <div className="tank-bar"><div className="tb-fill" style={{ width: "54%", background: "#f59e0b" }}></div></div>
             </div>
             <div className="hc-divider" style={{ marginTop: "12px" }}></div>
@@ -109,152 +95,142 @@ function Home() {
         </div>
       </section>
 
-      {/* STATS STRIP */}
-      <div className="stats-strip">
-        <div className="ss-item"><div className="ss-num">13%</div><div className="ss-label">VAT auto-calculated</div></div>
-        <div className="ss-item"><div className="ss-num">20+</div><div className="ss-label">Built-in features</div></div>
-        <div className="ss-item"><div className="ss-num">PDF</div><div className="ss-label">Bills ready to print</div></div>
-        <div className="ss-item"><div className="ss-num">100%</div><div className="ss-label">Nepal IRD compliant</div></div>
-      </div>
+      {/* GET STARTED */}
+      <section className="get-started" id="how">
+        <div className="gs-left">
+          <h2 className="gs-h">Get Started</h2>
+          <div className="gs-steps">
+            <div className="gs-step">
+              <div className="gs-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" />
+                </svg>
+              </div>
+              <div className="gs-text">
+                <div className="gs-no gs-active">STEP 1</div>
+                <div className="gs-title">Create your account</div>
+              </div>
+            </div>
+            <div className="gs-step">
+              <div className="gs-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 8l9-4 9 4-9 4-9-4z" />
+                  <path d="M3 8v8l9 4 9-4V8" />
+                  <path d="M12 12v8" />
+                </svg>
+              </div>
+              <div className="gs-text">
+                <div className="gs-no">STEP 2</div>
+                <div className="gs-title">Add your store and products</div>
+              </div>
+            </div>
+            <div className="gs-step">
+              <div className="gs-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" />
+                  <path d="M9 8h6M9 12h6" />
+                </svg>
+              </div>
+              <div className="gs-text">
+                <div className="gs-no">STEP 3</div>
+                <div className="gs-title">Start recording sales and printing bills</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="gs-right">
+          <div className="gs-screen"><img src={heroImg} alt="OilDesk dashboard" /></div>
+          <div className="gs-caption">Create your store account, add your products, and start billing — all from one screen.</div>
+        </div>
+      </section>
 
-      {/* HOW IT WORKS */}
-      <section className="section" id="how">
-        <div className="sec-tag">How it works</div>
-        <h2 className="sec-h">Up and running in <em>three steps</em></h2>
-        <p className="sec-p">No setup fees, no training needed. Most store owners have their first bill ready within ten minutes of signing up.</p>
-        <div className="steps">
-          <div className="step">
-            <div className="step-num">01</div>
-            <h3>Create your account</h3>
-            <p>Sign up with your store name and VAT number. Takes about two minutes. No paperwork, no verification delays.</p>
-          </div>
-          <div className="step">
-            <div className="step-num">02</div>
-            <h3>Add your products and customers</h3>
-            <p>Enter your oil products — petrol, diesel, whatever you stock — with prices. Add customer details including PAN numbers.</p>
-          </div>
-          <div className="step">
-            <div className="step-num">03</div>
-            <h3>Start billing and tracking</h3>
-            <p>Select a customer, add products, and OilDesk generates a VAT-compliant invoice. Stock updates automatically. Reports update in real time.</p>
+      {/* FEATURES */}
+      <section className="feat2" id="features">
+        <div className="feat2-inner">
+          <h2 className="feat2-h">Features</h2>
+          <div className="feat2-grid">
+            <div className="feat2-col">
+              <div className="feat2-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 3h10a1 1 0 0 1 1 1v17l-3-2-3 2-3-2-3 2V4a1 1 0 0 1 1-1z" />
+                  <path d="M9 8h6M9 12h6M9 16h3" />
+                </svg>
+              </div>
+              <h3>VAT Billing</h3>
+              <p>Every sale prints a proper VAT receipt automatically. No manual calculation, no writing by hand, no mistakes at month end.</p>
+            </div>
+            <div className="feat2-col">
+              <div className="feat2-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 8l9-4 9 4-9 4-9-4z" />
+                  <path d="M3 8v8l9 4 9-4V8" />
+                  <path d="M12 12v8" />
+                </svg>
+              </div>
+              <h3>Stock Tracking</h3>
+              <p>Your stock updates every time you record a sale or delivery. Know exactly what's left without counting drums or checking registers.</p>
+            </div>
+            <div className="feat2-col">
+              <div className="feat2-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4v16h16" />
+                  <path d="M8 14l3-3 3 2 4-5" />
+                </svg>
+              </div>
+              <h3>Sales Records</h3>
+              <p>Every transaction is saved the moment you enter it. Pull up any day's sales in seconds — no flipping through pages.</p>
+            </div>
+            <div className="feat2-col">
+              <div className="feat2-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="5" width="20" height="14" rx="2" />
+                  <path d="M2 10h20M6 15h4" />
+                </svg>
+              </div>
+              <h3>Customer Credit</h3>
+              <p>Track who bought on credit, how much they owe, and when they last paid. All in one place, always up to date.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* MAIN FEATURES */}
-      <section className="feat-bg" id="features">
-        <div className="sec-tag">Features</div>
-        <h2 className="sec-h">What OilDesk <em>actually does</em></h2>
-        <p className="sec-p">The things a Nepal oil store needs every day. Nothing more, nothing less.</p>
-        <div className="feat-grid" style={{ gridTemplateColumns: "repeat(2,1fr)" }}>
-          <div className="fc"><div className="fc-tag-id">F-01</div><h3>VAT Billing</h3><p>13% VAT calculated automatically on every transaction. Select customer and products — invoice ready in seconds. Print or download as PDF.</p><span className="fc-badge badge-green">VAT Auto · PDF Ready</span></div>
-          <div className="fc"><div className="fc-tag-id">F-02</div><h3>Stock Tracking</h3><p>Petrol, diesel, kerosene — stock updates with every sale. Low stock alert fires when a tank drops below your set minimum. No manual counting.</p><span className="fc-badge badge-red">Live · Alerts</span></div>
-          <div className="fc"><div className="fc-tag-id">F-03</div><h3>Daily &amp; Monthly Sales Reports</h3><p>Today's revenue, bills issued, and VAT collected — on the dashboard the moment you log in. Monthly view for comparing periods and IRD reporting.</p><span className="fc-badge badge-blue">Daily · Monthly · IRD</span></div>
-          <div className="fc"><div className="fc-tag-id">F-04</div><h3>Customer Records</h3><p>Name, phone, address, and PAN number stored per customer. Pull up a full billing history for any customer in one click.</p><span className="fc-badge badge-blue">PAN · History</span></div>
-          <div className="fc"><div className="fc-tag-id">F-05</div><h3>Bill History &amp; Search</h3><p>Every invoice stored and searchable. Filter by customer, date, or amount. Nothing gets lost, nothing needs filing manually.</p><span className="fc-badge badge-blue">Full History</span></div>
-          <div className="fc"><div className="fc-tag-id">F-06</div><h3>Secure Login &amp; Dashboard</h3><p>Password-protected access. One dashboard shows sales, stock levels, VAT collected, and recent bills — updated live every time something changes.</p><span className="fc-badge badge-amber">Secure · Live</span></div>
-        </div>
-      </section>
-
-      {/* BILLING HIGHLIGHT */}
-      <section className="billing-block">
-        <div>
-          <div className="bb-tag">VAT Billing</div>
-          <h2 className="bb-h">IRD-compliant invoices<br />in under 30 seconds</h2>
-          <p className="bb-p">Select the customer, add products, and OilDesk does the rest. The 13% VAT is applied automatically. The invoice is ready to print or download as a PDF before the customer is done paying.</p>
-          <div className="check-list">
-            <div className="ci"><div className="ci-dot">✓</div><span>13% VAT extracted from price (VAT inclusive)</span></div>
-            <div className="ci"><div className="ci-dot">✓</div><span>PDF download in one click</span></div>
-            <div className="ci"><div className="ci-dot">✓</div><span>Customer PAN number on every invoice</span></div>
-            <div className="ci"><div className="ci-dot">✓</div><span>Discounts applied before VAT</span></div>
-            <div className="ci"><div className="ci-dot">✓</div><span>Every bill stored and searchable</span></div>
+      {/* SIGN UP CTA */}
+      <section className="signup-cta">
+        <div className="su-inner">
+          <div className="su-col">
+            <h2>Sign Up and get Started</h2>
+            <button className="su-btn" onClick={() => navigate("/signup")}>Sign Up</button>
+            <p className="su-note">Already have an account? <span onClick={() => navigate("/signin")}>Click Here</span> to proceed</p>
+          </div>
+          <div className="su-col">
+            <h2>OilDesk on Your Mobile</h2>
           </div>
         </div>
-        <div className="invoice">
-          <div className="inv-top">
-            <div><div className="inv-name">VAT Invoice</div><div className="inv-no">BILL-2026-1206</div></div>
-            <div className="inv-status">Paid</div>
-          </div>
-          <div className="inv-meta">
-            <div><div className="inv-meta-k">Customer</div><div className="inv-meta-v">Ram Bahadur</div></div>
-            <div><div className="inv-meta-k">PAN No.</div><div className="inv-meta-v">123456789</div></div>
-            <div><div className="inv-meta-k">Date</div><div className="inv-meta-v">20 May 2026</div></div>
-            <div><div className="inv-meta-k">Station</div><div className="inv-meta-v">Kathmandu #01</div></div>
-          </div>
-          <table className="inv-tbl">
-            <thead><tr><th>Product</th><th>Qty</th><th>Rate</th><th>Total</th></tr></thead>
-            <tbody>
-              <tr><td>Petrol</td><td>20L</td><td>Rs 150</td><td>Rs 3,000</td></tr>
-              <tr><td>Diesel</td><td>10L</td><td>Rs 120</td><td>Rs 1,200</td></tr>
-            </tbody>
-          </table>
-          <div className="inv-totals">
-            <div className="inv-row"><span>Total Sales</span><span>Rs 4,200.00</span></div>
-            <div className="inv-row"><span>Base Amount (excl. VAT)</span><span>Rs 3,716.81</span></div>
-            <div className="inv-row"><span className="g">VAT included (13/113)</span><span className="g">Rs 483.19</span></div>
-            <div className="inv-row total"><span>Total Payable</span><span className="o">Rs 4,200.00</span></div>
-          </div>
-          <div className="inv-foot">VAT is included in the price · Print or download as PDF</div>
-        </div>
-      </section>
-
-      {/* WHY OILDESK */}
-      <section className="section" id="why" style={{ background: "#f8f9fa" }}>
-        <div className="sec-tag">Why OilDesk</div>
-        <h2 className="sec-h">Built for Nepal oil stores, <em>not adapted for them</em></h2>
-        <p className="sec-p">Most billing software is built for generic retail. OilDesk is built around how a Nepal petroleum store actually works.</p>
-        <div className="why-grid">
-          <div className="wc"><div className="wc-n">1</div><h4>Nepal VAT compliant</h4><p>13% VAT applied on every bill. No manual calculation, no IRD submission worries.</p></div>
-          <div className="wc"><div className="wc-n">2</div><h4>No paper records needed</h4><p>Bills, stock, customers — all stored digitally. Searchable in seconds.</p></div>
-          <div className="wc"><div className="wc-n">3</div><h4>You know your stock</h4><p>Real-time tracking means you know when to reorder before you run out.</p></div>
-          <div className="wc"><div className="wc-n">4</div><h4>Daily numbers, automatically</h4><p>Revenue, VAT, and bill count for today — no adding up receipts at the end of the day.</p></div>
-          <div className="wc"><div className="wc-n">5</div><h4>PDF bills in one click</h4><p>Professional VAT invoices ready to print or send. No formatting required.</p></div>
-          <div className="wc"><div className="wc-n">6</div><h4>Simple enough to use immediately</h4><p>No training, no manual. Any store owner can figure it out in a few minutes.</p></div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="cta">
-        <h2>Ready to stop doing this by hand?</h2>
-        <p>Set up your store in a few minutes. First bill ready before the end of the day.</p>
-        <div className="cta-btns">
-          <button className="cta-white" onClick={() => navigate("/signup")}>Get started free</button>
-          <button className="cta-dark" onClick={() => navigate("/signin")}>Sign in</button>
-        </div>
-        <div className="cta-note">No credit card required · Nepal IRD compliant</div>
       </section>
 
       {/* FOOTER */}
-      <footer>
-        <div>
-          <div className="fl-logo">Oil<span>Desk</span>.app</div>
-          <div className="fl-desc">Oil store management for Nepal petroleum retailers. VAT billing, stock, and sales in one place.</div>
-        </div>
-        <div className="fc-col">
-          <h5>Product</h5>
-          <a href="#features">Features</a>
-          <a href="#how">How it works</a>
-          <a href="#why">Why OilDesk</a>
-        </div>
-        <div className="fc-col">
-          <h5>Support</h5>
-          <a href="#">FAQs</a>
-          <a href="#">Contact</a>
-        </div>
-        <div className="fc-col">
-          <h5>Legal</h5>
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
+      <footer className="ft">
+        <div className="ft-grid">
+          <div className="ft-brand">
+            <div className="ft-logo">Oil<span>Desk</span></div>
+            <div className="ft-copy">© 2026 OilDesk Nepal — All rights reserved.</div>
+          </div>
+          <div className="ft-col">
+            <a href="#features">Features</a>
+            <a href="#how">How it works</a>
+            <a href="#why">Why OilDesk</a>
+          </div>
+          <div className="ft-col">
+            <span onClick={() => navigate("/faqs")}>FAQs</span>
+            <span onClick={() => navigate("/faqs")}>Contact</span>
+          </div>
+          <div className="ft-col">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+          </div>
         </div>
       </footer>
-      <div className="foot-bottom">
-        <div className="foot-copy">© 2026 OilDesk Nepal. All rights reserved.</div>
-        <div className="foot-right">
-          <a href="#">Privacy</a>
-          <a href="#">Terms</a>
-          <a href="#">Contact</a>
-        </div>
-      </div>
 
       {/* ── HOW IT WORKS MODAL ── */}
       {showHiw && (
