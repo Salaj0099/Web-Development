@@ -28,14 +28,43 @@ body { font-family: 'Inter', sans-serif; background: #eef2f7; min-height: 100vh;
 .auth-left {
   width: 340px;
   flex-shrink: 0;
-  background: linear-gradient(160deg, #0b1a2e 0%, #162640 100%);
+  background: linear-gradient(160deg, #2b5ba8 0%, #2456b8 100%);
   padding: 40px 32px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   position: relative;
   overflow: hidden;
 }
+
+/* WELCOME PANEL */
+.welcome-panel {
+  position: relative;
+  z-index: 1;
+  margin: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 0 8px;
+}
+.welcome-title { font-size: 30px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+.welcome-sub { font-size: 14px; color: #e7ecff; line-height: 1.7; max-width: 260px; }
+.welcome-btn {
+  margin-top: 8px;
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,0.85);
+  color: #fff;
+  border-radius: 24px;
+  padding: 11px 40px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.welcome-btn:hover { background: #fff; color: #2456b8; }
 .auth-left::before {
   content: '';
   position: absolute;

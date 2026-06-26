@@ -23,7 +23,7 @@ const signToken = (user) =>
 
 const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, storeName, vatNumber } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ message: "field empty" });
     }
@@ -32,7 +32,7 @@ const register = async (req, res) => {
       return res.status(400).json({ message: "email already registered" });
     }
     const hashpassword = await bcrypt.hash(password, 10);
-    const user = await createUser(name, email, hashpassword);
+    const user = await createUser(name, email, hashpassword, storeName, vatNumber);
     const token = signToken(user);
     return res.status(201).json({
       message: "Created Successfully",

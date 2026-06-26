@@ -47,31 +47,11 @@ function SignIn() {
 
         {/* LEFT PANEL */}
         <div className="auth-left">
-          <div className="left-brand">
-            <div className="left-logo" onClick={() => navigate("/")}>
-              <div className="left-logo-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 3C12 3 6 10 6 15C6 18.3 8.7 21 12 21C15.3 21 18 18.3 18 15C18 10 12 3 12 3Z"/></svg>
-              </div>
-              <span className="left-logo-text">Oil<span>Desk</span></span>
-            </div>
-            <div className="left-tagline">Your oil store,<br />managed properly.</div>
-            <p className="left-sub">VAT billing, stock tracking, and daily sales — all from one login.</p>
+          <div className="welcome-panel">
+            <h2 className="welcome-title">Hey There!</h2>
+            <p className="welcome-sub">Begin your amazing journey by creating an account with us today.</p>
+            <button className="welcome-btn" onClick={() => navigate("/signup")}>SIGN UP</button>
           </div>
-          <div className="left-stats">
-            <div className="left-stat">
-              <div className="stat-icon">⛽</div>
-              <div><div className="stat-label">VAT Calculation</div><div className="stat-val">13% extracted automatically</div></div>
-            </div>
-            <div className="left-stat">
-              <div className="stat-icon">📄</div>
-              <div><div className="stat-label">Invoices</div><div className="stat-val">IRD-compliant PDFs</div></div>
-            </div>
-            <div className="left-stat">
-              <div className="stat-icon">📦</div>
-              <div><div className="stat-label">Stock</div><div className="stat-val">Live alerts & tracking</div></div>
-            </div>
-          </div>
-          <div className="left-footer">© 2026 OilDesk Nepal</div>
         </div>
 
         {/* RIGHT PANEL */}

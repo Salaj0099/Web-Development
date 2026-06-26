@@ -1,12 +1,12 @@
 const pool = require("../database/db");
 
 // Columns safe to return to the client (never expose password / reset token)
-const PUBLIC_FIELDS = "id, name, email, created_at";
+const PUBLIC_FIELDS = "id, name, email, store_name, vat_number, created_at";
 
-const createUser = async (name, email, password) => {
+const createUser = async (name, email, password, storeName, vatNumber) => {
   const result = await pool.query(
-    `INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING ${PUBLIC_FIELDS}`,
-    [name, email, password]
+    `INSERT INTO users (name, email, password, store_name, vat_number) VALUES ($1, $2, $3, $4, $5) RETURNING ${PUBLIC_FIELDS}`,
+    [name, email, password, storeName || null, vatNumber || null]
   );
   return result.rows[0];
 };

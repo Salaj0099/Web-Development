@@ -5,7 +5,7 @@ import "./Auth.css"
 
 function SignUp() {
   const navigate = useNavigate()
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" })
+  const [form, setForm] = useState({ name: "", email: "", storeName: "", vatNumber: "", password: "", confirm: "" })
   const [showPw, setShowPw] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [agreed, setAgreed] = useState(false)
@@ -19,8 +19,8 @@ function SignUp() {
     if (!agreed) { setError("Please agree to the Terms and Conditions"); return }
     try {
       setLoading(true)
-      const res = await signUp({ name: form.name, email: form.email, password: form.password })
-      if (res.data.message === "Created successfully") {
+      const res = await signUp({ name: form.name, email: form.email, password: form.password, storeName: form.storeName, vatNumber: form.vatNumber })
+      if (res.data.message === "Created Successfully") {
         navigate("/signin")
       } else {
         setError(res.data.message)
@@ -47,31 +47,11 @@ function SignUp() {
 
         {/* LEFT PANEL */}
         <div className="auth-left">
-          <div className="left-brand">
-            <div className="left-logo" onClick={() => navigate("/")}>
-              <div className="left-logo-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 3C12 3 6 10 6 15C6 18.3 8.7 21 12 21C15.3 21 18 18.3 18 15C18 10 12 3 12 3Z"/></svg>
-              </div>
-              <span className="left-logo-text">Oil<span>Desk</span></span>
-            </div>
-            <div className="left-tagline">Set up in minutes.<br />Bill from day one.</div>
-            <p className="left-sub">Create your store account, add your products, and issue your first VAT invoice right away.</p>
+          <div className="welcome-panel">
+            <h2 className="welcome-title">Welcome Back!</h2>
+            <p className="welcome-sub">Stay connected by logging in with your credentials and continue your experience.</p>
+            <button className="welcome-btn" onClick={() => navigate("/signin")}>SIGN IN</button>
           </div>
-          <div className="left-stats">
-            <div className="left-stat">
-              <div className="stat-icon">✓</div>
-              <div><div className="stat-label">No credit card needed</div><div className="stat-val">Free trial</div></div>
-            </div>
-            <div className="left-stat">
-              <div className="stat-icon">🇳🇵</div>
-              <div><div className="stat-label">Built for Nepal</div><div className="stat-val">IRD VAT compliant</div></div>
-            </div>
-            <div className="left-stat">
-              <div className="stat-icon">⚡</div>
-              <div><div className="stat-label">Ready to use</div><div className="stat-val">Under 2 minutes setup</div></div>
-            </div>
-          </div>
-          <div className="left-footer">© 2026 OilDesk Nepal</div>
         </div>
 
         {/* RIGHT PANEL */}
@@ -109,6 +89,27 @@ function SignUp() {
                   placeholder="Enter valid email ID"
                   value={form.email}
                   onChange={e => setForm({ ...form, email: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="field">
+                <label>Name of Store</label>
+                <input
+                  type="text"
+                  placeholder="Enter store name"
+                  value={form.storeName}
+                  onChange={e => setForm({ ...form, storeName: e.target.value })}
+                />
+              </div>
+              <div className="field">
+                <label>VAT Number</label>
+                <input
+                  type="text"
+                  placeholder="Enter VAT number"
+                  value={form.vatNumber}
+                  onChange={e => setForm({ ...form, vatNumber: e.target.value })}
                 />
               </div>
             </div>

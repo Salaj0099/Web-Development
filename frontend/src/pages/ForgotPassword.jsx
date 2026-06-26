@@ -29,31 +29,11 @@ function ForgotPassword() {
 
         {/* LEFT PANEL */}
         <div className="auth-left">
-          <div className="left-brand">
-            <div className="left-logo" onClick={() => navigate("/")}>
-              <div className="left-logo-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 3C12 3 6 10 6 15C6 18.3 8.7 21 12 21C15.3 21 18 18.3 18 15C18 10 12 3 12 3Z"/></svg>
-              </div>
-              <span className="left-logo-text">Oil<span>Desk</span></span>
-            </div>
-            <div className="left-tagline">Password reset<br />is quick and safe.</div>
-            <p className="left-sub">Enter the email you registered with and we will send you a reset link right away.</p>
+          <div className="welcome-panel">
+            <h2 className="welcome-title">Welcome Back!</h2>
+            <p className="welcome-sub">Remember your password? Log in and pick up right where you left off.</p>
+            <button className="welcome-btn" onClick={() => navigate("/signin")}>SIGN IN</button>
           </div>
-          <div className="left-stats">
-            <div className="left-stat">
-              <div className="stat-icon">🔒</div>
-              <div><div className="stat-label">Secure process</div><div className="stat-val">Verified email only</div></div>
-            </div>
-            <div className="left-stat">
-              <div className="stat-icon">📧</div>
-              <div><div className="stat-label">Reset link sent to</div><div className="stat-val">Your registered email</div></div>
-            </div>
-            <div className="left-stat">
-              <div className="stat-icon">⏱</div>
-              <div><div className="stat-label">Link expires in</div><div className="stat-val">30 minutes</div></div>
-            </div>
-          </div>
-          <div className="left-footer">© 2026 OilDesk Nepal</div>
         </div>
 
         {/* RIGHT PANEL */}
