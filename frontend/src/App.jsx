@@ -6,6 +6,7 @@ import FAQs from "./pages/FAQs"
 import ForgotPassword from "./pages/ForgotPassword"
 import Dashboard from "./pages/Dashboard"
 import UpdateStock from "./pages/UpdateStock"
+import NewSale from "./pages/NewSale"
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/stock" element={<UpdateStock />} />
+        <Route path="/billing/new" element={<NewSale />} />
       </Routes>
     </BrowserRouter>
   )
