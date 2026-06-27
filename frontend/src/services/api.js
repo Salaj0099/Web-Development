@@ -34,6 +34,10 @@ export const getBill = (id) => API.get(`/bill/${id}`);
 export const deleteBill = (id) => API.delete(`/bill/delete/${id}`);
 export const getBillStats = () => API.get("/bill/stats");
 
+// Stock
+export const getStocks = () => API.get("/stock");
+export const updateStock = (data) => API.post("/stock/update", data);
+
 // Auth
 export const signUp = (data) => API.post("/user/register", data);
 export const signIn = (data) => API.post("/user/login", data);

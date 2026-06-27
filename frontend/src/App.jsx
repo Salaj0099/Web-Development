@@ -5,6 +5,7 @@ import SignUp from "./pages/SignUp"
 import FAQs from "./pages/FAQs"
 import ForgotPassword from "./pages/ForgotPassword"
 import Dashboard from "./pages/Dashboard"
+import UpdateStock from "./pages/UpdateStock"
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/faqs" element={<FAQs />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/stock" element={<UpdateStock />} />
       </Routes>
     </BrowserRouter>
   )

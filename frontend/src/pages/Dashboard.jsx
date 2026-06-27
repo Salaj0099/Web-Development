@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getStocks } from '../services/api'
 import './Dashboard.css'
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -157,11 +158,11 @@ const StockLevels = ({ stocks, loading }) => (
     </div>
     <div className="panel-body stock-list">
       {loading
-        ? [1,2,3,4].map(i => (
+        ? [1,2,3].map(i => (
             <div key={i} className="stock-item">
-              <Skel h={12} w="60%" />
-              <div style={{ marginTop: 6 }}><Skel h={4} /></div>
-              <div style={{ marginTop: 4 }}><Skel h={10} w="45%" /></div>
+              <div className="stock-row"><Skel h={13} w="50%" /><Skel h={13} w="22%" /></div>
+              <div style={{ marginTop: 8 }}><Skel h={6} /></div>
+              <div style={{ marginTop: 8 }}><Skel h={11} w="42%" /></div>
             </div>
           ))
         : stocks.map((s) => {
@@ -178,9 +179,7 @@ const StockLevels = ({ stocks, loading }) => (
                   <div className="stock-fill" style={{ width: `${pct}%`, background: color }} />
                 </div>
                 <div className="stock-bot">
-                  <span className="muted sm">
-                    {s.current.toLocaleString('en-IN')}{s.unit === 'L' ? 'L' : ' units'} / {s.capacity.toLocaleString('en-IN')}{s.unit === 'L' ? 'L' : ' units'}
-                  </span>
+                  <span className="stock-qty">{s.current.toLocaleString('en-IN')}L / {s.capacity.toLocaleString('en-IN')}L</span>
                   {isLow && <span className="reorder-tag">⚠ Reorder</span>}
                 </div>
               </div>
@@ -190,13 +189,47 @@ const StockLevels = ({ stocks, loading }) => (
   </div>
 )
 
+// ─── Commodities ──────────────────────────────────────────────────────────────
+const COMMODITIES = [
+  { name: 'Crude Oil', price: '69.23', change: -3.89 },
+  { name: 'Natural Gas', price: '3.28', change: -0.49 },
+  { name: 'Gasoline', price: '2.83', change: -2.71 },
+  { name: 'Heating Oil', price: '3.10', change: -3.45 },
+  { name: 'Gold', price: '4,096.30', change: 1.19 },
+  { name: 'Silver', price: '59.67', change: 1.47 },
+  { name: 'Copper', price: '6.21', change: 1.12 },
+]
+
+const Commodities = () => (
+  <div className="panel cmdty">
+    <div className="cmdty-head">Commodities</div>
+    <div className="cmdty-list">
+      {COMMODITIES.map(c => (
+        <div key={c.name} className="cmdty-row">
+          <span className="cmdty-name">{c.name}</span>
+          <span className="cmdty-price">{c.price}</span>
+          <span className={`cmdty-chg ${c.change >= 0 ? 'up' : 'dn'}`}>
+            {c.change >= 0 ? '+' : ''}{c.change.toFixed(2)}%
+          </span>
+        </div>
+      ))}
+    </div>
+    <div className="cmdty-foot">
+      <span>2026.06.26</span>
+      <span className="cmdty-foot-note">USD</span>
+    </div>
+  </div>
+)
+
 // ─── Transaction Table ────────────────────────────────────────────────────────
 const TransactionTable = ({ transactions, loading }) => {
   const [search, setSearch] = useState('')
+  const [expanded, setExpanded] = useState(false)
   const filtered = transactions.filter(t =>
     [t.customer, t.id, t.items].some(v => v.toLowerCase().includes(search.toLowerCase()))
   )
   const total = transactions.reduce((s, t) => s + t.amount, 0)
+  const visible = expanded ? filtered : filtered.slice(0, 3)
   return (
     <div className="panel">
       <div className="panel-hdr">
@@ -211,7 +244,6 @@ const TransactionTable = ({ transactions, loading }) => {
               onChange={e => setSearch(e.target.value)}
             />
           </div>
-          <span className="panel-link">View all</span>
         </div>
       </div>
       <div className="tbl-wrap">
@@ -239,7 +271,7 @@ const TransactionTable = ({ transactions, loading }) => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map(t => (
+              {visible.map(t => (
                 <tr key={t.id}>
                   <td><span className="bill-id">{t.id}</span></td>
                   <td><span className="cust-name">{t.customer}</span></td>
@@ -256,8 +288,12 @@ const TransactionTable = ({ transactions, loading }) => {
       </div>
       {!loading && (
         <div className="panel-foot">
-          <span className="muted sm">{filtered.length} of {transactions.length} bills</span>
           <span className="green sm">Total collected: <strong>{fmt(total)}</strong></span>
+          {filtered.length > 3 && (
+            <span className="panel-link" onClick={() => setExpanded(e => !e)}>
+              {expanded ? 'Show less' : `View all ${filtered.length} bills`}
+            </span>
+          )}
         </div>
       )}
     </div>
@@ -265,45 +301,72 @@ const TransactionTable = ({ transactions, loading }) => {
 }
 
 // ─── Activity Feed ────────────────────────────────────────────────────────────
-const ActivityFeed = ({ activity, loading }) => (
-  <div className="panel">
-    <div className="panel-hdr">
-      <span className="panel-title">Recent activity</span>
-      <span className="panel-link">View log</span>
-    </div>
-    <div className="panel-body">
-      {loading
-        ? [1,2,3,4,5].map(i => (
-            <div key={i} className="act-item">
-              <Skel w={8} h={8} />
-              <div style={{ flex: 1 }}>
-                <Skel h={11} w="70%" />
-                <div style={{ marginTop: 3 }}><Skel h={10} w="50%" /></div>
+const ActivityFeed = ({ activity, loading }) => {
+  const [expanded, setExpanded] = useState(false)
+  const visible = expanded ? activity : activity.slice(0, 3)
+  return (
+    <div className="panel">
+      <div className="panel-hdr">
+        <span className="panel-title">Recent activity</span>
+      </div>
+      <div className="panel-body">
+        {loading
+          ? [1,2,3].map(i => (
+              <div key={i} className="act-item">
+                <Skel w={8} h={8} />
+                <div style={{ flex: 1 }}>
+                  <Skel h={11} w="70%" />
+                  <div style={{ marginTop: 3 }}><Skel h={10} w="50%" /></div>
+                </div>
               </div>
-            </div>
-          ))
-        : activity.map((a, i) => (
-            <div key={i} className="act-item">
-              <div className="act-dot" style={{ background: TYPE_COLOR[a.type] }} />
-              <div className="act-body">
-                <div className="act-label" style={{ color: TYPE_COLOR[a.type] }}>{a.label}</div>
-                <div className="act-text">{a.text}</div>
-                <div className="act-sub">{a.sub}</div>
+            ))
+          : visible.map((a, i) => (
+              <div key={i} className="act-item">
+                <div className="act-dot" style={{ background: TYPE_COLOR[a.type] }} />
+                <div className="act-body">
+                  <div className="act-label" style={{ color: TYPE_COLOR[a.type] }}>{a.label}</div>
+                  <div className="act-text">{a.text}</div>
+                  <div className="act-sub">{a.sub}</div>
+                </div>
+                <div className="act-time">{a.time}</div>
               </div>
-              <div className="act-time">{a.time}</div>
-            </div>
-          ))}
+            ))}
+      </div>
+      {!loading && activity.length > 3 && (
+        <div className="panel-foot" style={{ justifyContent: 'flex-end' }}>
+          <span className="panel-link" onClick={() => setExpanded(e => !e)}>
+            {expanded ? 'Show less' : `View all ${activity.length}`}
+          </span>
+        </div>
+      )}
     </div>
-  </div>
-)
+  )
+}
 
 // ─── Counter panel (primary actions) ───────────────────────────────────────────
+const ctrIcon = (paths) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    {paths}
+  </svg>
+)
+
 const COUNTER = [
-  { id: 'sale', label: 'New Sale', hint: 'Issue a VAT bill', icon: 'bill', to: '/billing/new', primary: true },
-  { id: 'delivery', label: 'Log Delivery', hint: 'Stock coming in', icon: 'truck', to: '/stock/delivery' },
-  { id: 'customer', label: 'Add Customer', hint: 'Open an account', icon: 'person', to: '/customers/new' },
-  { id: 'payment', label: 'Take Payment', hint: 'Settle credit', icon: 'cash', to: '/payments/new' },
-  { id: 'report', label: 'Day Report', hint: 'Print summary', icon: 'printer', print: true },
+  {
+    id: 'sale', label: 'New Sale', hint: 'Bill — cash or credit', primary: true, to: '/billing/new',
+    icon: ctrIcon(<><path d="M6 3h12v18l-3-1.6-3 1.6-3-1.6L6 21V3z" /><path d="M9 8h6M9 12h5" /></>),
+  },
+  {
+    id: 'stock', label: 'Update Stock', hint: 'Add or adjust levels', to: '/stock',
+    icon: ctrIcon(<><path d="M3 8l9-4 9 4-9 4-9-4z" /><path d="M3 8v8l9 4 9-4V8" /><path d="M12 12v8" /></>),
+  },
+  {
+    id: 'credit', label: 'Collect Credit', hint: 'Clear customer dues', to: '/credit',
+    icon: ctrIcon(<><rect x="3" y="6" width="18" height="13" rx="2.5" /><path d="M3 10h18M7 15h4" /></>),
+  },
+  {
+    id: 'report', label: 'Day Report', hint: 'Sales & outstanding dues', print: true,
+    icon: ctrIcon(<><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 13v4M12 9v8M16 14v3" /></>),
+  },
 ]
 
 const CounterPanel = ({ navigate }) => (
@@ -319,7 +382,7 @@ const CounterPanel = ({ navigate }) => (
           className={`counter-tile${a.primary ? ' primary' : ''}`}
           onClick={() => (a.print ? window.print() : navigate(a.to))}
         >
-          <span className="counter-ic">{Ic[a.icon]}</span>
+          <span className="counter-ic">{a.icon}</span>
           <span className="counter-label">{a.label}</span>
           <span className="counter-hint">{a.hint}</span>
         </button>
@@ -460,6 +523,7 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showLogout, setShowLogout] = useState(false)
   const [user, setUser] = useState(null)
+  const [stocks, setStocks] = useState(STOCKS)
 
   useEffect(() => {
     const stored = localStorage.getItem('user')
@@ -476,6 +540,24 @@ export default function Dashboard() {
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 1200)
     return () => clearTimeout(t)
+  }, [])
+
+  useEffect(() => {
+    getStocks()
+      .then((res) => {
+        const rows = res.data && res.data.stock
+        if (Array.isArray(rows) && rows.length) {
+          setStocks(rows.map((s) => ({
+            name: s.name,
+            tank: s.tank,
+            current: Number(s.current_litres),
+            capacity: Number(s.capacity_litres),
+            threshold: Number(s.threshold_litres),
+            unit: 'L',
+          })))
+        }
+      })
+      .catch(() => {}) // keep fallback defaults if the API isn't reachable
   }, [])
 
   const handleLogout = () => {
@@ -509,12 +591,19 @@ export default function Dashboard() {
           <div className="stats-row">
             {stats.map(s => <StatCard key={s.label} {...s} loading={loading} />)}
           </div>
-          <div className="mid-row">
-            <WeeklyChart data={WEEKLY} loading={loading} />
-            <StockLevels stocks={STOCKS} loading={loading} />
+          <div className="dash-cols">
+            <div className="dash-col">
+              <TransactionTable transactions={TRANSACTIONS} loading={loading} />
+              <ActivityFeed activity={ACTIVITY} loading={loading} />
+            </div>
+            <div className="dash-col">
+              <WeeklyChart data={WEEKLY} loading={loading} />
+              <div className="side-by-side">
+                <StockLevels stocks={stocks} loading={loading} />
+                <Commodities />
+              </div>
+            </div>
           </div>
-          <TransactionTable transactions={TRANSACTIONS} loading={loading} />
-          <ActivityFeed activity={ACTIVITY} loading={loading} />
         </main>
       </div>
       <LogoutModal
