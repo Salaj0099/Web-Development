@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { updateStock } from "../services/api"
+import { getStocks, updateStock } from "../services/api"
 import "./UpdateStock.css"
 
-const TANKS = {
-  petrol: { label: "Petrol", current: "16,400 L", capacity: "20,000 L" },
-  diesel: { label: "Diesel", current: "3,600 L", capacity: "20,000 L" },
-  kerosene: { label: "Kerosene", current: "8,100 L", capacity: "15,000 L" },
+// Fallback only — live values come from the backend (the single source of truth).
+const DEFAULT_TANKS = {
+  petrol: { name: "Petrol", current: 16400, capacity: 20000 },
+  diesel: { name: "Diesel", current: 3600, capacity: 20000 },
+  kerosene: { name: "Kerosene", current: 8100, capacity: 15000 },
 }
+const fmtL = (n) => Number(n).toLocaleString("en-IN") + " L"
 
 function UpdateStock() {
   const navigate = useNavigate()
@@ -21,6 +23,7 @@ function UpdateStock() {
   })
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
+  const [tanks, setTanks] = useState(DEFAULT_TANKS)
 
   useEffect(() => {
     const stored = localStorage.getItem("user")
@@ -34,9 +37,25 @@ function UpdateStock() {
     }
   }, [navigate])
 
+  // Load live stock from the backend so "Current Stock" matches the dashboard.
+  useEffect(() => {
+    getStocks()
+      .then((res) => {
+        const rows = res.data && res.data.stock
+        if (Array.isArray(rows) && rows.length) {
+          const map = {}
+          rows.forEach((s) => {
+            map[s.product] = { name: s.name, current: Number(s.current_litres), capacity: Number(s.capacity_litres) }
+          })
+          setTanks(map)
+        }
+      })
+      .catch(() => {}) // keep fallback if the API isn't reachable
+  }, [])
+
   if (!user) return null
 
-  const tank = TANKS[form.product]
+  const tank = tanks[form.product] || DEFAULT_TANKS[form.product]
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
 
   const handleSubmit = async (e) => {
@@ -89,15 +108,15 @@ function UpdateStock() {
               <div className="us-field">
                 <label>Product <span className="req">*</span></label>
                 <select value={form.product} onChange={(e) => set("product", e.target.value)}>
-                  {Object.entries(TANKS).map(([k, v]) => (
-                    <option key={k} value={k}>{v.label}</option>
+                  {Object.entries(tanks).map(([k, v]) => (
+                    <option key={k} value={k}>{v.name}</option>
                   ))}
                 </select>
               </div>
               <div className="us-field">
                 <label>Current Stock</label>
                 <div className="us-readonly">
-                  {tank.current} <span className="us-muted">/ {tank.capacity}</span>
+                  {fmtL(tank.current)} <span className="us-muted">/ {fmtL(tank.capacity)}</span>
                 </div>
               </div>
             </div>

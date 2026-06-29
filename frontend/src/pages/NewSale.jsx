@@ -1,14 +1,31 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
+import { updateStock } from "../services/api"
 import "./UpdateStock.css"
 import "./NewSale.css"
 
-const PRODUCTS = [
-  { name: "Petrol", rate: "150.00", hsCode: "27101210" },
-  { name: "Diesel", rate: "126.55", hsCode: "27101930" },
-  { name: "Kerosene", rate: "110.00", hsCode: "27101910" },
+const FUEL_META = [
+  { name: "Petrol", key: "petrol", defRate: "150.00", hsCode: "27101210" },
+  { name: "Diesel", key: "diesel", defRate: "126.55", hsCode: "27101930" },
+  { name: "Kerosene", key: "kerosene", defRate: "110.00", hsCode: "27101910" },
 ]
+// Build the product list using any rates saved on the Rate page.
+const getProducts = () => {
+  let saved = {}
+  try { saved = JSON.parse(localStorage.getItem("fuelRates") || "{}") } catch (_) {}
+  return FUEL_META.map((f) => ({
+    name: f.name,
+    hsCode: f.hsCode,
+    rate: saved[f.key] != null ? String(saved[f.key]) : f.defRate,
+  }))
+}
 const VAT_RATE = 0.13
+
+// Local YYYY-MM-DD (avoids UTC off-by-one from toISOString).
+const localDay = (d = new Date()) => {
+  const x = new Date(d)
+  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`
+}
 
 // ── Amount in words (Nepali/Indian system: thousand, lakh, crore) ──────────────
 const ONES = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
@@ -46,11 +63,17 @@ function NewSale() {
   const [view, setView] = useState("form")
   const [error, setError] = useState("")
   const [invoiceNo] = useState("EFCSB/" + Date.now().toString().slice(-5))
-  const today = new Date().toISOString().slice(0, 10)
+  const createdAtRef = useRef(null) // fixed creation time for this bill
+  const stockDoneRef = useRef(false) // deduct stock only once per bill
+  const today = localDay()
 
+  const [products] = useState(getProducts) // current rates (saved on Rate page) read once on open
   const [customer, setCustomer] = useState({ name: "", pan: "", address: "", payment: "Cash", bankName: "", chequeAmount: "" })
   const [meta, setMeta] = useState({ date: today, vehicle: "" })
-  const [items, setItems] = useState([{ particular: "Diesel", hsCode: "27101930", qty: "", rate: "126.55" }])
+  const [items, setItems] = useState(() => {
+    const d = products.find((p) => p.name === "Diesel")
+    return [{ particular: "Diesel", hsCode: d.hsCode, qty: "", rate: d.rate }]
+  })
   const [discount, setDiscount] = useState("")
 
   useEffect(() => {
@@ -81,13 +104,67 @@ function NewSale() {
       if (idx !== i) return it
       const next = { ...it, [k]: v }
       if (k === "particular") {
-        const p = PRODUCTS.find((x) => x.name === v)
+        const p = products.find((x) => x.name === v)
         if (p) { next.rate = p.rate; next.hsCode = p.hsCode }
       }
       return next
     }))
-  const addItem = () => setItems([...items, { particular: "Petrol", hsCode: "27101210", qty: "", rate: "150.00" }])
+  const addItem = () => {
+    const p = products.find((x) => x.name === "Petrol")
+    setItems([...items, { particular: "Petrol", hsCode: p.hsCode, qty: "", rate: p.rate }])
+  }
   const removeItem = (i) => setItems(items.length > 1 ? items.filter((_, idx) => idx !== i) : items)
+
+  // Persist the bill → Today's transactions, Recent activity, Collect Credit, stock.
+  // Idempotent: re-saving the same bill updates it; stock is deducted only once.
+  const persistBill = () => {
+    if (!createdAtRef.current) createdAtRef.current = Date.now()
+    // Cheque payments are treated as credit (counted in the Credit section).
+    const status = (customer.payment === "Credit" || customer.payment === "Cheque") ? "credit" : "paid"
+    const bill = {
+      id: invoiceNo,
+      customer: customer.name,
+      pan: customer.pan,
+      items: items.map((it) => `${it.particular} — ${it.qty}L`).join(", "),
+      amount: Number(total.toFixed(2)),
+      vat: Number(vat.toFixed(2)),
+      status,
+      payment: customer.payment,
+      date: meta.date,
+      createdAt: createdAtRef.current, // real creation moment — used for "today" stats
+      time: new Date(createdAtRef.current).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    }
+    try {
+      const bills = JSON.parse(localStorage.getItem("bills") || "[]").filter((b) => b.id !== bill.id)
+      bills.unshift(bill)
+      localStorage.setItem("bills", JSON.stringify(bills))
+      console.log("[OilDesk] bill saved →", bill.id, "| total bills:", bills.length)
+
+      const act = {
+        type: status === "credit" ? "credit" : "bill",
+        label: status === "credit" ? "Credit bill" : "Bill issued",
+        text: `${bill.id} · ${bill.customer}`,
+        sub: `Rs. ${money(bill.amount)} — ${status === "credit" ? "Credit" : "Paid"}`,
+        time: bill.time,
+      }
+      const activity = JSON.parse(localStorage.getItem("activity") || "[]").filter((a) => a.text !== act.text)
+      activity.unshift(act)
+      localStorage.setItem("activity", JSON.stringify(activity))
+    } catch (_) {}
+
+    // Deduct sold quantities from tank stock — only once per bill.
+    if (!stockDoneRef.current) {
+      const qtyByFuel = {}
+      items.forEach((it) => {
+        const meta = FUEL_META.find((f) => f.name === it.particular)
+        if (meta) qtyByFuel[meta.key] = (qtyByFuel[meta.key] || 0) + (Number(it.qty) || 0)
+      })
+      Object.entries(qtyByFuel)
+        .filter(([, q]) => q > 0)
+        .forEach(([product, quantity]) => updateStock({ product, type: "sale", quantity }).catch(() => {}))
+      stockDoneRef.current = true
+    }
+  }
 
   const handleCreate = (e) => {
     e.preventDefault()
@@ -98,7 +175,13 @@ function NewSale() {
       return
     }
     setError("")
+    persistBill() // record the sale as soon as the bill is created
     setView("invoice")
+  }
+
+  const saveBill = () => {
+    persistBill() // idempotent — keeps the record in sync, then go to the dashboard
+    navigate("/dashboard")
   }
 
   // ── Invoice / print view ──────────────────────────────────────────────────
@@ -108,8 +191,8 @@ function NewSale() {
         <div className="ns-bar ns-no-print">
           <button className="us-btn us-back" onClick={() => setView("form")}>← Edit</button>
           <div className="ns-bar-right">
-            <button className="us-btn us-back" onClick={() => navigate("/dashboard")}>Go to Dashboard</button>
-            <button className="us-btn us-primary" onClick={() => window.print()}>Print / Save PDF</button>
+            <button className="us-btn us-back" onClick={() => window.print()}>Print / Save PDF</button>
+            <button className="us-btn us-primary" onClick={saveBill}>Save</button>
           </div>
         </div>
 
@@ -292,7 +375,7 @@ function NewSale() {
               {items.map((it, i) => (
                 <div className="ns-item-row" key={i}>
                   <select value={it.particular} onChange={(e) => setItem(i, "particular", e.target.value)}>
-                    {PRODUCTS.map((p) => <option key={p.name}>{p.name}</option>)}
+                    {products.map((p) => <option key={p.name}>{p.name}</option>)}
                   </select>
                   <span className="ns-hs">{it.hsCode}</span>
                   <input type="number" placeholder="0" value={it.qty} onChange={(e) => setItem(i, "qty", e.target.value)} />

@@ -363,7 +363,7 @@
 .counter-head { margin-bottom: 16px; }
 .counter-title { font-size: 16px; font-weight: 700; color: #0b1a2e; letter-spacing: -.01em; }
 .counter-sub { font-size: 12px; color: #8a94a3; margin-top: 3px; }
-.counter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.counter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
 .counter-tile {
   display: flex; flex-direction: column; align-items: flex-start;
   padding: 14px; border: 1px solid #eceef1; border-radius: 12px; background: #fafbfc;
@@ -480,6 +480,28 @@
 @media (prefers-reduced-motion: reduce) {
   .lo-overlay, .lo-dialog, .lo-overlay.closing, .lo-dialog.closing { animation: none; }
 }
+
+/* ── View-all list modal ─────────────────────────────────────────────────── */
+.dash-modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(11,26,46,.45); backdrop-filter: blur(2px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 48px 20px 32px; overflow-y: auto;
+  animation: lo-fade-in .18s ease;
+}
+.dash-modal {
+  position: relative; width: 100%; max-width: 880px;
+  animation: lo-pop-in .2s cubic-bezier(.16,1,.3,1);
+}
+.dash-modal-close {
+  position: absolute; top: -38px; right: 0;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,.16); color: #fff; border: none;
+  font-size: 18px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .12s;
+}
+.dash-modal-close:hover { background: rgba(255,255,255,.3); }
 
 @media (max-width: 520px) {
   .stats-row { gap: 8px; }

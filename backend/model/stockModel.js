@@ -5,17 +5,23 @@ const getAllStock = async () => {
   return result.rows;
 };
 
-// type: "delivery" adds to current; "adjustment" sets current. Capped at capacity.
+// type: "delivery" adds, "sale" subtracts, "adjustment" sets. Clamped to [0, capacity].
 const updateStock = async (product, type, quantity) => {
   const qty = Number(quantity);
-  const sql =
-    type === "adjustment"
-      ? `UPDATE stocks
-           SET current_litres = GREATEST(LEAST($1, capacity_litres), 0), updated_at = NOW()
-         WHERE product = $2 RETURNING *`
-      : `UPDATE stocks
-           SET current_litres = LEAST(current_litres + $1, capacity_litres), updated_at = NOW()
-         WHERE product = $2 RETURNING *`;
+  let sql;
+  if (type === "adjustment") {
+    sql = `UPDATE stocks
+             SET current_litres = GREATEST(LEAST($1, capacity_litres), 0), updated_at = NOW()
+           WHERE product = $2 RETURNING *`;
+  } else if (type === "sale") {
+    sql = `UPDATE stocks
+             SET current_litres = GREATEST(current_litres - $1, 0), updated_at = NOW()
+           WHERE product = $2 RETURNING *`;
+  } else {
+    sql = `UPDATE stocks
+             SET current_litres = LEAST(current_litres + $1, capacity_litres), updated_at = NOW()
+           WHERE product = $2 RETURNING *`;
+  }
   const result = await pool.query(sql, [qty, product]);
   return result.rows[0];
 };

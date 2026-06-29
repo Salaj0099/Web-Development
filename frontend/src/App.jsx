@@ -7,6 +7,8 @@ import ForgotPassword from "./pages/ForgotPassword"
 import Dashboard from "./pages/Dashboard"
 import UpdateStock from "./pages/UpdateStock"
 import NewSale from "./pages/NewSale"
+import Rate from "./pages/Rate"
+import CollectCredit from "./pages/CollectCredit"
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/stock" element={<UpdateStock />} />
         <Route path="/billing/new" element={<NewSale />} />
+        <Route path="/rate" element={<Rate />} />
+        <Route path="/credit" element={<CollectCredit />} />
       </Routes>
     </BrowserRouter>
   )

@@ -222,14 +222,13 @@ const Commodities = () => (
 )
 
 // ─── Transaction Table ────────────────────────────────────────────────────────
-const TransactionTable = ({ transactions, loading }) => {
+const TransactionTable = ({ transactions, loading, limit = 10, onViewAll }) => {
   const [search, setSearch] = useState('')
-  const [expanded, setExpanded] = useState(false)
   const filtered = transactions.filter(t =>
     [t.customer, t.id, t.items].some(v => v.toLowerCase().includes(search.toLowerCase()))
   )
   const total = transactions.reduce((s, t) => s + t.amount, 0)
-  const visible = expanded ? filtered : filtered.slice(0, 3)
+  const visible = filtered.slice(0, limit)
   return (
     <div className="panel">
       <div className="panel-hdr">
@@ -289,10 +288,8 @@ const TransactionTable = ({ transactions, loading }) => {
       {!loading && (
         <div className="panel-foot">
           <span className="green sm">Total collected: <strong>{fmt(total)}</strong></span>
-          {filtered.length > 3 && (
-            <span className="panel-link" onClick={() => setExpanded(e => !e)}>
-              {expanded ? 'Show less' : `View all ${filtered.length} bills`}
-            </span>
+          {onViewAll && filtered.length > limit && (
+            <span className="panel-link" onClick={onViewAll}>View all {filtered.length} bills</span>
           )}
         </div>
       )}
@@ -301,9 +298,8 @@ const TransactionTable = ({ transactions, loading }) => {
 }
 
 // ─── Activity Feed ────────────────────────────────────────────────────────────
-const ActivityFeed = ({ activity, loading }) => {
-  const [expanded, setExpanded] = useState(false)
-  const visible = expanded ? activity : activity.slice(0, 3)
+const ActivityFeed = ({ activity, loading, limit = 10, onViewAll }) => {
+  const visible = activity.slice(0, limit)
   return (
     <div className="panel">
       <div className="panel-hdr">
@@ -332,11 +328,9 @@ const ActivityFeed = ({ activity, loading }) => {
               </div>
             ))}
       </div>
-      {!loading && activity.length > 3 && (
+      {!loading && onViewAll && activity.length > limit && (
         <div className="panel-foot" style={{ justifyContent: 'flex-end' }}>
-          <span className="panel-link" onClick={() => setExpanded(e => !e)}>
-            {expanded ? 'Show less' : `View all ${activity.length}`}
-          </span>
+          <span className="panel-link" onClick={onViewAll}>View log ({activity.length})</span>
         </div>
       )}
     </div>
@@ -366,6 +360,10 @@ const COUNTER = [
   {
     id: 'report', label: 'Day Report', hint: 'Sales & outstanding dues', print: true,
     icon: ctrIcon(<><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 13v4M12 9v8M16 14v3" /></>),
+  },
+  {
+    id: 'rate', label: 'Rate', hint: 'Per-litre prices', to: '/rate',
+    icon: ctrIcon(<><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0l-7.2-7.2A2 2 0 0 1 3 11.4V4a1 1 0 0 1 1-1h7.4a2 2 0 0 1 1.4.6l7.8 7.8a2 2 0 0 1 0 2.6z" /><circle cx="7.5" cy="7.5" r="1.3" /></>),
   },
 ]
 
@@ -521,9 +519,14 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [activeNav, setActiveNav] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showAllTxn, setShowAllTxn] = useState(false)
+  const [showAllActivity, setShowAllActivity] = useState(false)
   const [showLogout, setShowLogout] = useState(false)
   const [user, setUser] = useState(null)
   const [stocks, setStocks] = useState(STOCKS)
+  const [transactions, setTransactions] = useState(TRANSACTIONS)
+  const [activity, setActivity] = useState(ACTIVITY)
+  const [bills, setBills] = useState([])
 
   useEffect(() => {
     const stored = localStorage.getItem('user')
@@ -540,6 +543,30 @@ export default function Dashboard() {
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 1200)
     return () => clearTimeout(t)
+  }, [])
+
+  useEffect(() => {
+    const refresh = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem('bills') || '[]')
+        setBills(saved)
+        setTransactions(saved.length ? [...saved, ...TRANSACTIONS] : TRANSACTIONS)
+        const acts = JSON.parse(localStorage.getItem('activity') || '[]')
+        setActivity(acts.length ? [...acts, ...ACTIVITY] : ACTIVITY)
+        const ld = (d) => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}` }
+        const tk = ld(new Date())
+        const todays = saved.filter((b) => (b.createdAt ? ld(b.createdAt) : b.date) === tk)
+        console.log('[OilDesk] dashboard loaded → bills:', saved.length, '| today:', todays.length, '| todayKey:', tk, saved)
+      } catch (e) { console.warn('[OilDesk] dashboard load error', e) }
+    }
+    refresh()
+    // Re-read when returning to the tab or when another tab updates the data.
+    window.addEventListener('focus', refresh)
+    window.addEventListener('storage', refresh)
+    return () => {
+      window.removeEventListener('focus', refresh)
+      window.removeEventListener('storage', refresh)
+    }
   }, [])
 
   useEffect(() => {
@@ -567,11 +594,25 @@ export default function Dashboard() {
 
   if (!user) return null
 
+  // ── Live summary, computed from saved bills (never hardcoded) ───────────────
+  const localDay = (d) => {
+    const x = new Date(d)
+    return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`
+  }
+  const todayKey = localDay(new Date())
+  // Filter by the bill's creation date (createdAt); fall back to the invoice date for older bills.
+  const billDay = (b) => (b.createdAt ? localDay(b.createdAt) : b.date)
+  const sum = (arr, k) => arr.reduce((s, b) => s + (Number(b[k]) || 0), 0)
+  const todaysBills = bills.filter((b) => billDay(b) === todayKey)
+  const creditBills = bills.filter((b) => b.status === 'credit')
+  const creditCustomers = new Set(creditBills.map((b) => b.customer)).size
+  const rs = (n) => 'Rs. ' + Math.round(n).toLocaleString('en-IN')
+
   const stats = [
-    { label: "Today's sales", value: 'Rs. 42,850', sub: '↑ 12% vs yesterday', subType: 'up' },
-    { label: 'Bills issued', value: '14', sub: 'Since 6:00 AM' },
-    { label: 'VAT collected', value: 'Rs. 4,951', sub: '13% on total sales' },
-    { label: 'Credit outstanding', value: 'Rs. 8,200', sub: '3 customers unpaid', subType: 'dn' },
+    { label: "Today's sales", value: rs(sum(todaysBills, 'amount')), sub: `${todaysBills.length} bill${todaysBills.length === 1 ? '' : 's'} today` },
+    { label: 'Bills issued', value: String(todaysBills.length), sub: 'Today' },
+    { label: 'VAT collected', value: rs(sum(todaysBills, 'vat')), sub: '13% on sales' },
+    { label: 'Credit outstanding', value: rs(sum(creditBills, 'amount')), sub: `${creditCustomers} customer${creditCustomers === 1 ? '' : 's'} unpaid`, subType: sum(creditBills, 'amount') > 0 ? 'dn' : undefined },
   ]
 
   return (
@@ -593,8 +634,8 @@ export default function Dashboard() {
           </div>
           <div className="dash-cols">
             <div className="dash-col">
-              <TransactionTable transactions={TRANSACTIONS} loading={loading} />
-              <ActivityFeed activity={ACTIVITY} loading={loading} />
+              <TransactionTable transactions={transactions} loading={loading} limit={3} onViewAll={() => setShowAllTxn(true)} />
+              <ActivityFeed activity={activity} loading={loading} limit={3} onViewAll={() => setShowAllActivity(true)} />
             </div>
             <div className="dash-col">
               <WeeklyChart data={WEEKLY} loading={loading} />
@@ -611,6 +652,24 @@ export default function Dashboard() {
         onCancel={() => setShowLogout(false)}
         onConfirm={handleLogout}
       />
+
+      {showAllTxn && (
+        <div className="dash-modal-overlay" onClick={() => setShowAllTxn(false)}>
+          <div className="dash-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="dash-modal-close" onClick={() => setShowAllTxn(false)} aria-label="Close">×</button>
+            <TransactionTable transactions={transactions} loading={false} limit={10} />
+          </div>
+        </div>
+      )}
+
+      {showAllActivity && (
+        <div className="dash-modal-overlay" onClick={() => setShowAllActivity(false)}>
+          <div className="dash-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="dash-modal-close" onClick={() => setShowAllActivity(false)} aria-label="Close">×</button>
+            <ActivityFeed activity={activity} loading={false} limit={10} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

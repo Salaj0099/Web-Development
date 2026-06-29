@@ -15,7 +15,7 @@ const updateStockLevel = async (req, res) => {
     if (!product || quantity === undefined || quantity === "") {
       return res.status(400).json({ message: "field empty" });
     }
-    const movement = type === "adjustment" ? "adjustment" : "delivery";
+    const movement = ["adjustment", "sale"].includes(type) ? type : "delivery";
     const updated = await updateStock(product, movement, quantity);
     if (!updated) {
       return res.status(404).json({ message: "product not found" });
