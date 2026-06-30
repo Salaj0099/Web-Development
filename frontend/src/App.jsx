@@ -9,6 +9,10 @@ import UpdateStock from "./pages/UpdateStock"
 import NewSale from "./pages/NewSale"
 import Rate from "./pages/Rate"
 import CollectCredit from "./pages/CollectCredit"
+import DayReport from "./pages/DayReport"
+import Settings from "./pages/Settings"
+import Reports from "./pages/Reports"
+import Supplier from "./pages/Supplier"
 
 function App() {
   return (
@@ -24,6 +28,10 @@ function App() {
         <Route path="/billing/new" element={<NewSale />} />
         <Route path="/rate" element={<Rate />} />
         <Route path="/credit" element={<CollectCredit />} />
+        <Route path="/report" element={<DayReport />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/suppliers" element={<Supplier />} />
       </Routes>
     </BrowserRouter>
   )

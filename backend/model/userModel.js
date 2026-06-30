@@ -43,10 +43,26 @@ const updatePassword = async (id, password) => {
   return result.rows[0];
 };
 
+// Returns the full row (including password) by id — for internal auth checks only.
+const getUserById = async (id) => {
+  const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+  return result.rows[0];
+};
+
+const updateProfile = async (id, { name, storeName, vatNumber }) => {
+  const result = await pool.query(
+    `UPDATE users SET name = $1, store_name = $2, vat_number = $3 WHERE id = $4 RETURNING ${PUBLIC_FIELDS}`,
+    [name, storeName || null, vatNumber || null, id]
+  );
+  return result.rows[0];
+};
+
 module.exports = {
   createUser,
   existingUser,
   saveResetToken,
   getUserByResetToken,
   updatePassword,
+  getUserById,
+  updateProfile,
 };

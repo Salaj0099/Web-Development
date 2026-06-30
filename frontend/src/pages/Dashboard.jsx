@@ -42,16 +42,6 @@ const STOCKS = [
   { name: 'Kerosene', tank: 'Tank 03', current: 8100, capacity: 15000, unit: 'L', threshold: 3000 },
 ]
 
-const WEEKLY = [
-  { day: 'Mon', amount: 38200 },
-  { day: 'Tue', amount: 51400 },
-  { day: 'Wed', amount: 44800 },
-  { day: 'Thu', amount: 42850 },
-  { day: 'Fri', amount: 0 },
-  { day: 'Sat', amount: 0 },
-  { day: 'Sun', amount: 0 },
-]
-
 const ACTIVITY = [
   { type: 'bill', label: 'Bill issued', text: 'BILL-2082-0014 · Ram Bahadur Thapa', sub: 'Rs. 4,500 — Paid', time: '11:42 AM' },
   { type: 'delivery', label: 'Delivery received', text: 'Diesel 500L — Nepal Oil Corp.', sub: 'Rs. 54,000', time: '09:15 AM' },
@@ -65,9 +55,9 @@ const NAV = [
   { id: 'sales', label: 'Sales & Billing', icon: 'bill', group: 'main' },
   { id: 'stock', label: 'Stock', icon: 'box', group: 'main' },
   { id: 'customers', label: 'Customers', icon: 'users', group: 'records' },
-  { id: 'suppliers', label: 'Suppliers', icon: 'truck', group: 'records' },
-  { id: 'reports', label: 'Reports', icon: 'chart', group: 'records' },
-  { id: 'settings', label: 'Settings', icon: 'settings', group: 'account' },
+  { id: 'suppliers', label: 'Suppliers', icon: 'truck', group: 'records', to: '/suppliers' },
+  { id: 'reports', label: 'Reports', icon: 'chart', group: 'records', to: '/reports' },
+  { id: 'settings', label: 'Settings', icon: 'settings', group: 'account', to: '/settings' },
 ]
 
 const TYPE_COLOR = {
@@ -98,7 +88,7 @@ const StatCard = ({ label, value, sub, subType, loading }) => (
 )
 
 // ─── Weekly Chart ─────────────────────────────────────────────────────────────
-const WeeklyChart = ({ data, loading }) => {
+const WeeklyChart = ({ data, delta, loading }) => {
   const max = Math.max(...data.map(d => d.amount), 1)
   const total = data.reduce((s, d) => s + d.amount, 0)
   return (
@@ -143,7 +133,11 @@ const WeeklyChart = ({ data, loading }) => {
         )}
         <div className="chart-foot">
           <span className="muted">Week total: <strong style={{ color: '#0b1a2e' }}>{fmt(total)}</strong></span>
-          <span className="green">↑ 8% vs last week</span>
+          {delta != null && (
+            <span className={delta >= 0 ? 'green' : 'red'}>
+              {delta >= 0 ? '↑' : '↓'} {Math.abs(delta)}% vs last week
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -289,7 +283,7 @@ const TransactionTable = ({ transactions, loading, limit = 10, onViewAll }) => {
         <div className="panel-foot">
           <span className="green sm">Total collected: <strong>{fmt(total)}</strong></span>
           {onViewAll && filtered.length > limit && (
-            <span className="panel-link" onClick={onViewAll}>View all {filtered.length} bills</span>
+            <span className="panel-link" onClick={onViewAll}>View all</span>
           )}
         </div>
       )}
@@ -330,7 +324,7 @@ const ActivityFeed = ({ activity, loading, limit = 10, onViewAll }) => {
       </div>
       {!loading && onViewAll && activity.length > limit && (
         <div className="panel-foot" style={{ justifyContent: 'flex-end' }}>
-          <span className="panel-link" onClick={onViewAll}>View log ({activity.length})</span>
+          <span className="panel-link" onClick={onViewAll}>View all</span>
         </div>
       )}
     </div>
@@ -358,7 +352,7 @@ const COUNTER = [
     icon: ctrIcon(<><rect x="3" y="6" width="18" height="13" rx="2.5" /><path d="M3 10h18M7 15h4" /></>),
   },
   {
-    id: 'report', label: 'Day Report', hint: 'Sales & outstanding dues', print: true,
+    id: 'report', label: 'Day Report', hint: 'Sales & outstanding dues', to: '/report',
     icon: ctrIcon(<><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 13v4M12 9v8M16 14v3" /></>),
   },
   {
@@ -393,7 +387,7 @@ const CounterPanel = ({ navigate }) => (
 const initials = (s = '') =>
   s.trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'U'
 
-const Sidebar = ({ active, setActive, open, onClose, onLogout, user }) => {
+const Sidebar = ({ active, setActive, open, onClose, onLogout, user, navigate }) => {
   const groups = ['main', 'records', 'account']
   const labels = { main: 'Main', records: 'Records', account: 'Account' }
   return (
@@ -416,7 +410,7 @@ const Sidebar = ({ active, setActive, open, onClose, onLogout, user }) => {
                 <button
                   key={n.id}
                   className={`nav-item ${active === n.id ? 'active' : ''}`}
-                  onClick={() => { setActive(n.id); onClose() }}
+                  onClick={() => { setActive(n.id); onClose(); if (n.to) navigate(n.to) }}
                 >
                   {Ic[n.icon]}{n.label}
                 </button>
@@ -430,7 +424,7 @@ const Sidebar = ({ active, setActive, open, onClose, onLogout, user }) => {
 }
 
 // ─── TopBar ───────────────────────────────────────────────────────────────────
-const TopBar = ({ onMenu, user, onLogout }) => {
+const TopBar = ({ onMenu, user, onLogout, navigate }) => {
   const [open, setOpen] = useState(false)
   return (
     <header className="topbar">
@@ -448,6 +442,7 @@ const TopBar = ({ onMenu, user, onLogout }) => {
           <svg className="tb-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
           {open && (
             <div className="tb-menu" onClick={(e) => e.stopPropagation()}>
+              <button className="tb-menu-item" onClick={() => { setOpen(false); navigate('/settings') }}>Settings</button>
               <button className="tb-menu-item" onClick={() => { setOpen(false); onLogout() }}>Sign out</button>
             </div>
           )}
@@ -496,9 +491,9 @@ const LogoutModal = ({ open, onCancel, onConfirm }) => {
             <path d="M15 17l5-5-5-5" /><path d="M20 12H9" /><path d="M9 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3" />
           </svg>
         </div>
-        <h2 id="lo-title" className="lo-title">Ready to sign off?</h2>
+        <h2 id="lo-title" className="lo-title">Ready to sign out?</h2>
         <p id="lo-desc" className="lo-desc">
-          This will end your current session and take you back to the OilDesk login screen. Make sure any open bill is saved first.
+          You'll be returned to the OilDesk login screen. Before you continue, make sure any open bill has been saved.
         </p>
         <div className="lo-actions">
           <button ref={cancelRef} className="lo-btn lo-cancel" onClick={() => close(onCancel)}>
@@ -615,6 +610,26 @@ export default function Dashboard() {
     { label: 'Credit outstanding', value: rs(sum(creditBills, 'amount')), sub: `${creditCustomers} customer${creditCustomers === 1 ? '' : 's'} unpaid`, subType: sum(creditBills, 'amount') > 0 ? 'dn' : undefined },
   ]
 
+  // ── Weekly sales, computed from saved bills (Mon–Sun of the current week) ────
+  const LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const salesOn = (date) => sum(bills.filter((b) => billDay(b) === localDay(date)), 'amount')
+  const monday = new Date()
+  monday.setHours(0, 0, 0, 0)
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7)) // back to Monday
+  const weekly = LABELS.map((day, i) => {
+    const d = new Date(monday); d.setDate(monday.getDate() + i)
+    return { day, amount: salesOn(d) }
+  })
+  // Real week-over-week change (same elapsed days last week vs this week).
+  const elapsed = ((new Date().getDay() + 6) % 7) + 1 // days into this week so far
+  const weekTotal = weekly.slice(0, elapsed).reduce((s, d) => s + d.amount, 0)
+  let prevTotal = 0
+  for (let i = 0; i < elapsed; i++) {
+    const d = new Date(monday); d.setDate(monday.getDate() - 7 + i)
+    prevTotal += salesOn(d)
+  }
+  const weekDelta = prevTotal > 0 ? Math.round(((weekTotal - prevTotal) / prevTotal) * 100) : null
+
   return (
     <div className="db-layout">
       <Sidebar
@@ -624,9 +639,10 @@ export default function Dashboard() {
         onClose={() => setSidebarOpen(false)}
         onLogout={handleLogout}
         user={user}
+        navigate={navigate}
       />
       <div className="db-main">
-        <TopBar onMenu={() => setSidebarOpen(true)} user={user} onLogout={() => setShowLogout(true)} />
+        <TopBar onMenu={() => setSidebarOpen(true)} user={user} onLogout={() => setShowLogout(true)} navigate={navigate} />
         <main className="db-content">
           <CounterPanel navigate={navigate} />
           <div className="stats-row">
@@ -638,7 +654,7 @@ export default function Dashboard() {
               <ActivityFeed activity={activity} loading={loading} limit={3} onViewAll={() => setShowAllActivity(true)} />
             </div>
             <div className="dash-col">
-              <WeeklyChart data={WEEKLY} loading={loading} />
+              <WeeklyChart data={weekly} delta={weekDelta} loading={loading} />
               <div className="side-by-side">
                 <StockLevels stocks={stocks} loading={loading} />
                 <Commodities />

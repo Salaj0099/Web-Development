@@ -121,11 +121,26 @@ function NewSale() {
     if (!createdAtRef.current) createdAtRef.current = Date.now()
     // Cheque payments are treated as credit (counted in the Credit section).
     const status = (customer.payment === "Credit" || customer.payment === "Cheque") ? "credit" : "paid"
+    // Structured per-fuel lines so Reports can break sales down accurately.
+    // Line amounts are scaled to the net (post-discount) total so they sum to `amount`.
+    const scale = subtotal > 0 ? netSale / subtotal : 0
+    const lines = items.map((it) => {
+      const m = FUEL_META.find((f) => f.name === it.particular)
+      return {
+        fuel: it.particular,
+        key: m ? m.key : null,
+        qty: Number(it.qty) || 0,
+        rate: Number(it.rate) || 0,
+        amount: Number((lineAmount(it) * scale).toFixed(2)),
+      }
+    })
     const bill = {
       id: invoiceNo,
       customer: customer.name,
       pan: customer.pan,
       items: items.map((it) => `${it.particular} — ${it.qty}L`).join(", "),
+      lines,
+      litres: Number(items.reduce((s, it) => s + (Number(it.qty) || 0), 0).toFixed(2)),
       amount: Number(total.toFixed(2)),
       vat: Number(vat.toFixed(2)),
       status,
@@ -309,8 +324,8 @@ function NewSale() {
               </div>
               <div className="us-field">
                 <label>PAN No.</label>
-                <input type="text" placeholder="Enter PAN number" value={customer.pan}
-                  onChange={(e) => setCustomer({ ...customer, pan: e.target.value })} />
+                <input type="text" inputMode="numeric" placeholder="Enter PAN number" value={customer.pan}
+                  onChange={(e) => setCustomer({ ...customer, pan: e.target.value.replace(/\D/g, "") })} />
               </div>
               <div className="us-field">
                 <label>Address</label>
@@ -379,7 +394,7 @@ function NewSale() {
                   </select>
                   <span className="ns-hs">{it.hsCode}</span>
                   <input type="number" placeholder="0" value={it.qty} onChange={(e) => setItem(i, "qty", e.target.value)} />
-                  <input type="number" placeholder="0.00" value={it.rate} onChange={(e) => setItem(i, "rate", e.target.value)} />
+                  <span className="ns-hs">{it.rate}</span>
                   <span className="ns-amount num">{money(lineAmount(it))}</span>
                   <button type="button" className="ns-remove" onClick={() => removeItem(i)} title="Remove" disabled={items.length === 1}>×</button>
                 </div>

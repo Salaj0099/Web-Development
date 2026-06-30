@@ -12,10 +12,7 @@ function CollectCredit() {
 
   // Collection modal state
   const [collecting, setCollecting] = useState(null) // bill being collected
-  const [method, setMethod] = useState("Cash")
-  const [bank, setBank] = useState("")
   const [cleared, setCleared] = useState(true)
-  const [cErr, setCErr] = useState("")
 
   useEffect(() => {
     const stored = localStorage.getItem("user")
@@ -44,21 +41,15 @@ function CollectCredit() {
 
   const openCollect = (bill) => {
     setCollecting(bill)
-    setMethod("Cash")
-    setBank("")
     setCleared(true)
-    setCErr("")
   }
 
   const confirmCollect = () => {
-    if (method === "Cheque" && !bank.trim()) { setCErr("Enter the bank name"); return }
+    // Only clear the due when the payment is actually cleared.
+    // If "No", the bill stays in the credit list as outstanding.
+    if (!cleared) { setCollecting(null); return }
     try {
-      const collection = {
-        method,
-        at: Date.now(),
-        ...(method === "Cheque" ? { bank: bank.trim(), chequeCleared: cleared } : {}),
-        ...(method === "Credit" ? { creditCleared: cleared } : {}),
-      }
+      const collection = { method: collecting.payment, cleared, at: Date.now() }
       const bills = JSON.parse(localStorage.getItem("bills") || "[]")
       const next = bills.map((b) => (b.id === collecting.id ? { ...b, status: "paid", collection } : b))
       localStorage.setItem("bills", JSON.stringify(next))
@@ -98,7 +89,12 @@ function CollectCredit() {
               {credits.map((c) => (
                 <div className="cc-row" key={c.id}>
                   <div className="cc-main">
-                    <div className="cc-name">{c.customer}</div>
+                    <div className="cc-name">
+                      {c.customer}
+                      <span className={`cc-tag ${c.payment === "Cheque" ? "cheque" : "credit"}`}>
+                        {c.payment === "Cheque" ? "Cheque" : "Credit"}
+                      </span>
+                    </div>
                     <div className="cc-meta">{c.id} · {c.items}{c.date ? ` · ${c.date}` : ""}</div>
                   </div>
                   <div className="cc-amount">{money(c.amount)}</div>
@@ -121,36 +117,16 @@ function CollectCredit() {
             <p className="cc-modal-sub">{collecting.customer} · {money(collecting.amount)}</p>
 
             <div className="us-field">
-              <label>Payment Method</label>
-              <select value={method} onChange={(e) => setMethod(e.target.value)}>
-                <option>Cash</option>
-                <option>Cheque</option>
-                <option>Credit</option>
-              </select>
+              <label>
+                {collecting.payment === "Cheque"
+                  ? "Has the cheque been cleared?"
+                  : "Has the full amount been cleared?"}
+              </label>
+              <div className="cc-toggle">
+                <button type="button" className={cleared ? "active" : ""} onClick={() => setCleared(true)}>Yes</button>
+                <button type="button" className={!cleared ? "active" : ""} onClick={() => setCleared(false)}>No</button>
+              </div>
             </div>
-
-            {method === "Cheque" && (
-              <div className="us-field cc-field-gap">
-                <label>Bank Name <span className="req">*</span></label>
-                <input type="text" placeholder="Enter bank name" value={bank} onChange={(e) => setBank(e.target.value)} />
-              </div>
-            )}
-
-            {(method === "Cheque" || method === "Credit") && (
-              <div className="us-field cc-field-gap">
-                <label>
-                  {method === "Cheque"
-                    ? "Has the cheque been cleared by the bank yet?"
-                    : "Has this credit payment been fully cleared?"}
-                </label>
-                <div className="cc-toggle">
-                  <button type="button" className={cleared ? "active" : ""} onClick={() => setCleared(true)}>Yes</button>
-                  <button type="button" className={!cleared ? "active" : ""} onClick={() => setCleared(false)}>No</button>
-                </div>
-              </div>
-            )}
-
-            {cErr && <div className="us-error cc-field-gap">{cErr}</div>}
 
             <div className="cc-modal-actions">
               <button className="us-btn us-back" onClick={() => setCollecting(null)}>Cancel</button>

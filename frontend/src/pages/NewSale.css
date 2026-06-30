@@ -92,11 +92,13 @@
 
 /* ── Print: show only the invoice sheet ──────────────────────────────────── */
 @media print {
+  /* margin: 0 removes the browser's auto header/footer (title, date, URL) */
+  @page { size: auto; margin: 0; }
   body * { visibility: hidden; }
   .invoice-sheet, .invoice-sheet * { visibility: visible; }
   .invoice-sheet {
     position: absolute; left: 0; top: 0; width: 100%; max-width: none;
-    margin: 0; border: none; border-radius: 0; box-shadow: none; padding: 10px 14px;
+    margin: 0; border: none; border-radius: 0; box-shadow: none; padding: 26px 30px;
   }
   .ns-no-print { display: none !important; }
 }

@@ -4,6 +4,8 @@ const {
   saveResetToken,
   getUserByResetToken,
   updatePassword,
+  getUserById,
+  updateProfile,
 } = require("../model/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -110,4 +112,59 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { register, login, forgotPassword, resetPassword };
+// ── Authenticated account endpoints ─────────────────────────────────────────
+const getMe = async (req, res) => {
+  try {
+    const user = await getUserById(req.user.id);
+    if (!user) return res.status(404).json({ message: "user not found" });
+    return res.status(200).json({ user: sanitizeUser(user) });
+  } catch (e) {
+    return res.status(500).json({ message: "unsuccessful", e: e.message });
+  }
+};
+
+const editProfile = async (req, res) => {
+  try {
+    const { name, storeName, vatNumber } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: "name is required" });
+    }
+    const user = await updateProfile(req.user.id, { name: name.trim(), storeName, vatNumber });
+    return res.status(200).json({ message: "Profile updated", user: sanitizeUser(user) });
+  } catch (e) {
+    return res.status(500).json({ message: "unsuccessful", e: e.message });
+  }
+};
+
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "field empty" });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "new password must be at least 6 characters" });
+    }
+    const user = await getUserById(req.user.id);
+    if (!user) return res.status(404).json({ message: "user not found" });
+    const isMatched = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatched) {
+      return res.status(400).json({ message: "current password is incorrect" });
+    }
+    const hashpassword = await bcrypt.hash(newPassword, 10);
+    await updatePassword(user.id, hashpassword);
+    return res.status(200).json({ message: "Password updated" });
+  } catch (e) {
+    return res.status(500).json({ message: "unsuccessful", e: e.message });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  forgotPassword,
+  resetPassword,
+  getMe,
+  editProfile,
+  changePassword,
+};

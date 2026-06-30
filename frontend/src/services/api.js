@@ -38,8 +38,18 @@ export const getBillStats = () => API.get("/bill/stats");
 export const getStocks = () => API.get("/stock");
 export const updateStock = (data) => API.post("/stock/update", data);
 
+// Supplier (Nepal Oil Corporation) deliveries
+export const getDeliveries = () => API.get("/supplier/deliveries");
+export const recordDelivery = (data) => API.post("/supplier/deliveries", data);
+export const receiveDelivery = (id) => API.put(`/supplier/deliveries/${id}/receive`);
+
 // Auth
 export const signUp = (data) => API.post("/user/register", data);
 export const signIn = (data) => API.post("/user/login", data);
 export const forgotPassword = (data) => API.post("/user/forgot-password", data);
 export const resetPassword = (data) => API.post("/user/reset-password", data);
+
+// Account (authenticated)
+export const getMe = () => API.get("/user/me");
+export const updateProfile = (data) => API.put("/user/profile", data);
+export const changePassword = (data) => API.put("/user/password", data);

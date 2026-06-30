@@ -1,0 +1,88 @@
+/* Settings — builds on the shared .us-* page styles */
+
+/* Edit-details text button in card header */
+.set-text-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none; border: none; cursor: pointer; font-family: inherit;
+  font-size: 12.5px; font-weight: 600; color: #2456b8; padding: 0;
+  transition: color .12s;
+}
+.set-text-btn:hover { color: #c85a00; }
+.set-text-btn svg { width: 14px; height: 14px; }
+
+/* Identity block (avatar + name) */
+.set-identity { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.set-avatar {
+  width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff4ec; color: #c85a00; font-size: 16px; font-weight: 700;
+}
+.set-identity-name { font-size: 15px; font-weight: 700; color: #0b1a2e; }
+.set-identity-sub { font-size: 12.5px; color: #6b7280; margin-top: 2px; }
+
+/* Read-only info rows */
+.set-rows { display: flex; flex-direction: column; }
+.set-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 12px 0; border-bottom: 1px solid #f0f2f5; font-size: 13.5px;
+}
+.set-row:last-child { border-bottom: none; }
+.set-key { color: #6b7280; }
+.set-val { color: #0b1a2e; font-weight: 600; text-align: right; word-break: break-word; }
+.set-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: #15803d;
+  background: #e7f6ec; border: 1px solid #c5e9d1; border-radius: 100px; padding: 2px 10px;
+}
+.set-status::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%; background: #16a34a;
+}
+
+.set-note { font-size: 12.5px; color: #98a2b3; margin-top: 16px; line-height: 1.5; }
+.set-note a { color: #2456b8; text-decoration: none; }
+.set-note a:hover { text-decoration: underline; }
+
+/* Success banner (mirrors .us-error) */
+.set-ok {
+  background: #ecfdf3; border: 1px solid #bbf0cf; color: #15803d;
+  font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px;
+}
+
+/* Password field with show/hide toggle */
+.set-pw { position: relative; }
+.set-pw input { width: 100%; padding-right: 44px; box-sizing: border-box; }
+.set-pw-eye {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 32px; height: 32px; border: none; background: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; color: #98a2b3;
+  border-radius: 6px; transition: color .12s, background .12s;
+}
+.set-pw-eye:hover { color: #c85a00; background: #f4f6f8; }
+.set-pw-eye svg { width: 18px; height: 18px; }
+.set-spacer { display: block; } /* keeps current-password on its own row in the 2-col grid */
+
+.set-form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+
+/* Logout card */
+.set-logout { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.set-logout-title { font-size: 14.5px; font-weight: 700; color: #0b1a2e; }
+.set-logout-sub { font-size: 12.5px; color: #6b7280; margin-top: 3px; }
+.set-logout-btn {
+  display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0;
+  height: 42px; padding: 0 18px; border-radius: 8px; cursor: pointer; font-family: inherit;
+  font-size: 13.5px; font-weight: 600;
+  background: #fff; border: 1px solid #f0c4c4; color: #c0392b;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.set-logout-btn:hover { background: #fdecec; border-color: #e9a8a8; }
+.set-logout-btn svg { width: 17px; height: 17px; }
+
+@media (max-width: 640px) {
+  .set-spacer { display: none; }
+  .set-form-actions { flex-direction: column-reverse; }
+  .set-form-actions .us-btn { width: 100%; }
+  .set-logout { flex-direction: column; align-items: stretch; }
+  .set-logout-btn { width: 100%; justify-content: center; }
+  .set-val { text-align: left; }
+  .set-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+}

@@ -40,3 +40,20 @@ VALUES
   ('diesel',   'Diesel',   'Tank 02',  3600, 20000, 4000),
   ('kerosene', 'Kerosene', 'Tank 03',  8100, 15000, 3000)
 ON CONFLICT (product) DO NOTHING;
+
+-- Deliveries received from Nepal Oil Corporation (the only supplier)
+CREATE TABLE IF NOT EXISTS deliveries (
+  id            SERIAL PRIMARY KEY,
+  product       VARCHAR(50) NOT NULL,
+  name          VARCHAR(80) NOT NULL,
+  quantity      NUMERIC(12,2) NOT NULL,
+  rate          NUMERIC(12,2) NOT NULL,
+  total_amount  NUMERIC(14,2) NOT NULL,
+  invoice_no    VARCHAR(80) NOT NULL UNIQUE,
+  delivery_date DATE NOT NULL,
+  status        VARCHAR(20) NOT NULL DEFAULT 'received',
+  remarks       TEXT,
+  created_at    TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_deliveries_date ON deliveries (delivery_date DESC);
