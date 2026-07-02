@@ -5,8 +5,9 @@ import SignUp from "./pages/SignUp"
 import FAQs from "./pages/FAQs"
 import ForgotPassword from "./pages/ForgotPassword"
 import Dashboard from "./pages/Dashboard"
-import UpdateStock from "./pages/UpdateStock"
+import StockManagement from "./pages/StockManagement"
 import NewSale from "./pages/NewSale"
+import BillManagement from "./pages/BillManagement"
 import Rate from "./pages/Rate"
 import CollectCredit from "./pages/CollectCredit"
 import DayReport from "./pages/DayReport"
@@ -24,7 +25,8 @@ function App() {
         <Route path="/faqs" element={<FAQs />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/stock" element={<UpdateStock />} />
+        <Route path="/stock" element={<StockManagement />} />
+        <Route path="/billing" element={<BillManagement />} />
         <Route path="/billing/new" element={<NewSale />} />
         <Route path="/rate" element={<Rate />} />
         <Route path="/credit" element={<CollectCredit />} />

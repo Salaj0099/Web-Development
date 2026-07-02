@@ -5,7 +5,7 @@ const {
   createDelivery,
   setDeliveryReceived,
 } = require("../model/deliveryModel");
-const { updateStock } = require("../model/stockModel");
+const { recordMovement } = require("../model/stockModel");
 
 // The station buys only from Nepal Oil Corporation — a fixed business fact,
 // not a managed list. These are NOC's public head-office details.
@@ -31,7 +31,7 @@ const listDeliveries = async (req, res) => {
 
 const recordDelivery = async (req, res) => {
   try {
-    const { product, quantity, rate, invoiceNo, deliveryDate, status, remarks } = req.body;
+    const { product, quantity, rate, invoiceNo, deliveryDate, status, remarks, staff } = req.body;
 
     if (!FUEL_NAMES[product]) {
       return res.status(400).json({ message: "Select a valid fuel type" });
@@ -56,6 +56,21 @@ const recordDelivery = async (req, res) => {
     }
 
     const finalStatus = status === "pending" ? "pending" : "received";
+
+    // Received deliveries top up the tank first (this validates tank capacity
+    // and writes the audit trail). Only once that succeeds do we save the
+    // delivery record, so a rejected delivery never leaves a stray row.
+    if (finalStatus === "received") {
+      await recordMovement({
+        product,
+        type: "delivery",
+        quantity: qty,
+        reference: invoiceNo.trim(),
+        staff: staff || (req.user && req.user.email),
+        remarks,
+      });
+    }
+
     const delivery = await createDelivery({
       product,
       name: FUEL_NAMES[product],
@@ -68,14 +83,9 @@ const recordDelivery = async (req, res) => {
       remarks,
     });
 
-    // Received deliveries top up the tank immediately.
-    if (finalStatus === "received") {
-      await updateStock(product, "delivery", qty);
-    }
-
     return res.status(201).json({ message: "Delivery recorded", delivery });
   } catch (e) {
-    return res.status(500).json({ message: "unsuccessful", e: e.message });
+    return res.status(e.status || 500).json({ message: e.status ? e.message : "unsuccessful" });
   }
 };
 
@@ -89,11 +99,18 @@ const markReceived = async (req, res) => {
     if (delivery.status === "received") {
       return res.status(400).json({ message: "This delivery is already received" });
     }
+    // Top up the tank first; only flip the status once the stock move succeeds.
+    await recordMovement({
+      product: delivery.product,
+      type: "delivery",
+      quantity: delivery.quantity,
+      reference: delivery.invoice_no,
+      staff: (req.body && req.body.staff) || (req.user && req.user.email),
+    });
     const updated = await setDeliveryReceived(id);
-    await updateStock(delivery.product, "delivery", delivery.quantity);
     return res.status(200).json({ message: "Delivery received", delivery: updated });
   } catch (e) {
-    return res.status(500).json({ message: "unsuccessful", e: e.message });
+    return res.status(e.status || 500).json({ message: e.status ? e.message : "unsuccessful" });
   }
 };
 

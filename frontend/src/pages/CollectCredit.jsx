@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { getAllBills, collectBill } from "../services/api"
 import "./UpdateStock.css"
 import "./CollectCredit.css"
 
@@ -27,10 +28,9 @@ function CollectCredit() {
   }, [navigate])
 
   const loadCredits = () => {
-    try {
-      const bills = JSON.parse(localStorage.getItem("bills") || "[]")
-      setCredits(bills.filter((b) => b.status === "credit"))
-    } catch (_) { setCredits([]) }
+    getAllBills()
+      .then((res) => setCredits((res.data.bills || []).filter((b) => b.status === "credit")))
+      .catch(() => setCredits([]))
   }
 
   useEffect(() => { loadCredits() }, [])
@@ -44,15 +44,12 @@ function CollectCredit() {
     setCleared(true)
   }
 
-  const confirmCollect = () => {
+  const confirmCollect = async () => {
     // Only clear the due when the payment is actually cleared.
     // If "No", the bill stays in the credit list as outstanding.
     if (!cleared) { setCollecting(null); return }
     try {
-      const collection = { method: collecting.payment, cleared, at: Date.now() }
-      const bills = JSON.parse(localStorage.getItem("bills") || "[]")
-      const next = bills.map((b) => (b.id === collecting.id ? { ...b, status: "paid", collection } : b))
-      localStorage.setItem("bills", JSON.stringify(next))
+      await collectBill(collecting.dbId, { cleared: true, staff: user.name || user.email })
       loadCredits()
     } catch (_) {}
     setCollecting(null)

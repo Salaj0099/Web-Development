@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStocks } from '../services/api'
+import { getStocks, getAllBills } from '../services/api'
 import './Dashboard.css'
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -36,11 +36,6 @@ const TRANSACTIONS = [
   { id: 'BILL-2082-0007', customer: 'Ganesh Hardware Store', items: 'Kerosene — 20L', amount: 1800, vat: 208, status: 'paid', time: '08:30 AM' },
 ]
 
-const STOCKS = [
-  { name: 'Petrol', tank: 'Tank 01', current: 16400, capacity: 20000, unit: 'L', threshold: 4000 },
-  { name: 'Diesel', tank: 'Tank 02', current: 3600, capacity: 20000, unit: 'L', threshold: 4000 },
-  { name: 'Kerosene', tank: 'Tank 03', current: 8100, capacity: 15000, unit: 'L', threshold: 3000 },
-]
 
 const ACTIVITY = [
   { type: 'bill', label: 'Bill issued', text: 'BILL-2082-0014 · Ram Bahadur Thapa', sub: 'Rs. 4,500 — Paid', time: '11:42 AM' },
@@ -52,8 +47,8 @@ const ACTIVITY = [
 
 const NAV = [
   { id: 'dashboard', label: 'Dashboard', icon: 'grid', group: 'main' },
-  { id: 'sales', label: 'Sales & Billing', icon: 'bill', group: 'main' },
-  { id: 'stock', label: 'Stock', icon: 'box', group: 'main' },
+  { id: 'sales', label: 'Sales & Billing', icon: 'bill', group: 'main', to: '/billing' },
+  { id: 'stock', label: 'Stock', icon: 'box', group: 'main', to: '/stock' },
   { id: 'customers', label: 'Customers', icon: 'users', group: 'records' },
   { id: 'suppliers', label: 'Suppliers', icon: 'truck', group: 'records', to: '/suppliers' },
   { id: 'reports', label: 'Reports', icon: 'chart', group: 'records', to: '/reports' },
@@ -151,7 +146,7 @@ const StockLevels = ({ stocks, loading }) => (
       <span className="panel-title">Stock Remaining</span>
     </div>
     <div className="panel-body stock-list">
-      {loading
+      {loading || !stocks.length
         ? [1,2,3].map(i => (
             <div key={i} className="stock-item">
               <div className="stock-row"><Skel h={13} w="50%" /><Skel h={13} w="22%" /></div>
@@ -518,9 +513,9 @@ export default function Dashboard() {
   const [showAllActivity, setShowAllActivity] = useState(false)
   const [showLogout, setShowLogout] = useState(false)
   const [user, setUser] = useState(null)
-  const [stocks, setStocks] = useState(STOCKS)
-  const [transactions, setTransactions] = useState(TRANSACTIONS)
-  const [activity, setActivity] = useState(ACTIVITY)
+  const [stocks, setStocks] = useState([])
+  const [transactions, setTransactions] = useState([])
+  const [activity, setActivity] = useState([])
   const [bills, setBills] = useState([])
 
   useEffect(() => {
@@ -541,34 +536,47 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
+    let active = true
     const refresh = () => {
-      try {
-        const saved = JSON.parse(localStorage.getItem('bills') || '[]')
-        setBills(saved)
-        setTransactions(saved.length ? [...saved, ...TRANSACTIONS] : TRANSACTIONS)
-        const acts = JSON.parse(localStorage.getItem('activity') || '[]')
-        setActivity(acts.length ? [...acts, ...ACTIVITY] : ACTIVITY)
-        const ld = (d) => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}` }
-        const tk = ld(new Date())
-        const todays = saved.filter((b) => (b.createdAt ? ld(b.createdAt) : b.date) === tk)
-        console.log('[OilDesk] dashboard loaded → bills:', saved.length, '| today:', todays.length, '| todayKey:', tk, saved)
-      } catch (e) { console.warn('[OilDesk] dashboard load error', e) }
+      getAllBills()
+        .then((res) => {
+          if (!active) return
+          const list = res.data.bills || []
+          setBills(list)
+          setTransactions(list)
+          // Recent activity is derived straight from the bills.
+          setActivity(list.slice(0, 12).map((b) => ({
+            type: b.status === 'credit' ? 'credit' : 'bill',
+            label: b.status === 'credit' ? 'Credit bill' : 'Bill issued',
+            text: `${b.id} · ${b.customer || 'Cash customer'}`,
+            sub: `Rs. ${Math.round(b.amount).toLocaleString('en-IN')} — ${b.status === 'credit' ? 'Outstanding' : 'Paid'}`,
+            time: b.time,
+          })))
+        })
+        .catch(() => {})
     }
     refresh()
-    // Re-read when returning to the tab or when another tab updates the data.
+    // Keep the dashboard live: refresh when the tab regains focus and on a poll.
     window.addEventListener('focus', refresh)
-    window.addEventListener('storage', refresh)
+    const poll = setInterval(refresh, 15000)
     return () => {
+      active = false
       window.removeEventListener('focus', refresh)
-      window.removeEventListener('storage', refresh)
+      clearInterval(poll)
     }
   }, [])
 
+  // Keep the tank levels live: pull from the backend (the single source of
+  // truth shared with Stock Management) on load, when the tab regains focus,
+  // and on a short interval — so sales, deliveries and adjustments show up
+  // without a manual refresh.
   useEffect(() => {
-    getStocks()
-      .then((res) => {
-        const rows = res.data && res.data.stock
-        if (Array.isArray(rows) && rows.length) {
+    let active = true
+    const loadStocks = () => {
+      getStocks()
+        .then((res) => {
+          const rows = res.data && res.data.stock
+          if (!active || !Array.isArray(rows)) return
           setStocks(rows.map((s) => ({
             name: s.name,
             tank: s.tank,
@@ -577,9 +585,17 @@ export default function Dashboard() {
             threshold: Number(s.threshold_litres),
             unit: 'L',
           })))
-        }
-      })
-      .catch(() => {}) // keep fallback defaults if the API isn't reachable
+        })
+        .catch(() => {})
+    }
+    loadStocks()
+    window.addEventListener('focus', loadStocks)
+    const poll = setInterval(loadStocks, 15000)
+    return () => {
+      active = false
+      window.removeEventListener('focus', loadStocks)
+      clearInterval(poll)
+    }
   }, [])
 
   const handleLogout = () => {

@@ -29,19 +29,21 @@ export const deleteProduct = (id) => API.delete(`/product/delete/${id}`);
 
 // Bills
 export const createBill = (data) => API.post("/bill/create", data);
-export const getAllBills = () => API.get("/bill/all");
+export const getAllBills = (params) => API.get("/bill/all", { params });
 export const getBill = (id) => API.get(`/bill/${id}`);
-export const deleteBill = (id) => API.delete(`/bill/delete/${id}`);
-export const getBillStats = () => API.get("/bill/stats");
+export const cancelBill = (id, data) => API.put(`/bill/${id}/cancel`, data);
+export const collectBill = (id, data) => API.put(`/bill/${id}/collect`, data);
 
 // Stock
 export const getStocks = () => API.get("/stock");
 export const updateStock = (data) => API.post("/stock/update", data);
+export const getStockMovements = (params) => API.get("/stock/movements", { params });
+export const adjustStock = (data) => API.post("/stock/adjust", data);
 
 // Supplier (Nepal Oil Corporation) deliveries
 export const getDeliveries = () => API.get("/supplier/deliveries");
 export const recordDelivery = (data) => API.post("/supplier/deliveries", data);
-export const receiveDelivery = (id) => API.put(`/supplier/deliveries/${id}/receive`);
+export const receiveDelivery = (id, data) => API.put(`/supplier/deliveries/${id}/receive`, data);
 
 // Auth
 export const signUp = (data) => API.post("/user/register", data);

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { getStocks } from "../services/api"
+import { getStocks, getAllBills } from "../services/api"
 import { computeReport, presetRange, FUELS } from "../utils/reportData"
 import "./UpdateStock.css"
 import "./Reports.css"
@@ -37,7 +37,7 @@ function Reports() {
   }, [navigate])
 
   useEffect(() => {
-    try { setBills(JSON.parse(localStorage.getItem("bills") || "[]")) } catch (_) {}
+    getAllBills().then((res) => setBills(res.data.bills || [])).catch(() => {})
     try { setRates(JSON.parse(localStorage.getItem("fuelRates") || "{}")) } catch (_) {}
     getStocks()
       .then((res) => {

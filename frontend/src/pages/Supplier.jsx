@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { getDeliveries, recordDelivery, receiveDelivery } from "../services/api"
+import { getDeliveries, recordDelivery, receiveDelivery, getStocks } from "../services/api"
 import "./UpdateStock.css"
 import "./Supplier.css"
 
@@ -30,6 +30,7 @@ function Supplier() {
   const [user, setUser] = useState(null)
   const [supplier, setSupplier] = useState(null)
   const [deliveries, setDeliveries] = useState([])
+  const [stocks, setStocks] = useState([])
   const [loading, setLoading] = useState(true)
 
   const [form, setForm] = useState(BLANK)
@@ -48,6 +49,8 @@ function Supplier() {
     } catch (_) { navigate("/signin", { replace: true }) }
   }, [navigate])
 
+  // Pull delivery records and live tank levels together. Stock is the shared
+  // source of truth, so this stays in sync however the inventory was changed.
   const load = () => {
     getDeliveries()
       .then((res) => {
@@ -56,6 +59,20 @@ function Supplier() {
       })
       .catch(() => setError("Couldn't load delivery records. Please try again."))
       .finally(() => setLoading(false))
+    getStocks()
+      .then((res) => {
+        const rows = res.data && res.data.stock
+        if (Array.isArray(rows)) {
+          setStocks(rows.map((s) => ({
+            product: s.product,
+            name: s.name,
+            current: Number(s.current_litres),
+            capacity: Number(s.capacity_litres),
+            threshold: Number(s.threshold_litres),
+          })))
+        }
+      })
+      .catch(() => {})
   }
   useEffect(() => { load() }, [])
 
@@ -87,6 +104,7 @@ function Supplier() {
         deliveryDate: form.deliveryDate,
         status: form.status,
         remarks: form.remarks.trim(),
+        staff: user.name || user.email,
       })
       const name = FUELS.find((f) => f.key === form.product).name
       setOk(form.status === "received"
@@ -104,7 +122,7 @@ function Supplier() {
   const markReceived = async (id) => {
     try {
       setBusyId(id); setError(""); setOk("")
-      await receiveDelivery(id)
+      await receiveDelivery(id, { staff: user.name || user.email })
       setOk("Delivery marked received — stock updated.")
       load()
     } catch (err) {
@@ -154,6 +172,38 @@ function Supplier() {
               <Contact ic="mail" label="Email" value={supplier.email} />
               <Contact ic="globe" label="Website" value={supplier.website} />
               <Contact ic="pin" label="Office" value={supplier.address} />
+            </div>
+          </section>
+        )}
+
+        {/* Available stock — live tank levels from the shared inventory */}
+        {stocks.length > 0 && (
+          <section className="us-card">
+            <div className="us-card-hd">
+              <span className="us-section">AVAILABLE STOCK</span>
+              <span className="sup-hint">Updates after every received delivery</span>
+            </div>
+            <div className="sup-stock">
+              {stocks.map((s) => {
+                const pct = s.capacity ? Math.round((s.current / s.capacity) * 100) : 0
+                const low = s.current <= s.threshold
+                const color = low ? "#dc2626" : pct >= 60 ? "#16a34a" : "#d97706"
+                return (
+                  <div className="sup-stock-item" key={s.product}>
+                    <div className="sup-stock-top">
+                      <span className="sup-stock-name">{s.name}</span>
+                      <span className="sup-stock-pct" style={{ color }}>{pct}%</span>
+                    </div>
+                    <div className="sup-stock-track">
+                      <div className="sup-stock-fill" style={{ width: `${pct}%`, background: color }} />
+                    </div>
+                    <div className="sup-stock-qty">
+                      {litres(s.current)} <span>/ {litres(s.capacity)}</span>
+                      {low && <span className="sup-stock-low">Low</span>}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </section>
         )}

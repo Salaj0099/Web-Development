@@ -44,6 +44,22 @@
   font-size: 13px; padding: 10px 14px; border-radius: 8px;
 }
 
+.sup-hint { font-size: 11.5px; color: #98a2b3; }
+
+/* Available stock */
+.sup-stock { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.sup-stock-top { display: flex; justify-content: space-between; align-items: baseline; }
+.sup-stock-name { font-size: 13.5px; font-weight: 600; color: #0b1a2e; }
+.sup-stock-pct { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sup-stock-track { height: 8px; background: #f0f2f5; border-radius: 100px; overflow: hidden; margin: 8px 0 7px; }
+.sup-stock-fill { height: 100%; border-radius: 100px; transition: width .3s; }
+.sup-stock-qty { font-size: 12px; color: #475467; font-variant-numeric: tabular-nums; }
+.sup-stock-qty span { color: #98a2b3; }
+.sup-stock-low {
+  margin-left: 8px; font-size: 10.5px; font-weight: 600; color: #c0392b;
+  background: #fdecec; border: 1px solid #f3c9c9; border-radius: 100px; padding: 1px 8px;
+}
+
 /* History table */
 .sup-table-wrap { overflow-x: auto; }
 .sup-table { width: 100%; border-collapse: collapse; }
@@ -73,4 +89,5 @@
   .sup-summary { grid-template-columns: repeat(2, 1fr); }
   .sup-contacts { grid-template-columns: 1fr; }
   .sup-profile { flex-direction: column; align-items: flex-start; }
+  .sup-stock { grid-template-columns: 1fr; gap: 16px; }
 }

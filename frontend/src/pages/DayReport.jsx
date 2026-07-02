@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { getAllBills } from "../services/api"
 import "./UpdateStock.css"
 import "./DayReport.css"
 
@@ -27,7 +28,7 @@ function DayReport() {
   }, [navigate])
 
   useEffect(() => {
-    try { setBills(JSON.parse(localStorage.getItem("bills") || "[]")) } catch (_) {}
+    getAllBills().then((res) => setBills(res.data.bills || [])).catch(() => {})
   }, [])
 
   if (!user) return null
